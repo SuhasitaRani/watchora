@@ -436,6 +436,33 @@ function MainApp({
   const [incidents, setIncidents] = useState<IncidentReport[] | null>(null);
   const [assistanceRequests, setAssistanceRequests] = useState<AssistanceRequest[] | null>(null);
   const [readingEntries, setReadingEntries] = useState<ReadingEntry[] | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        setInstallPrompt(null);
+        announce('Watchora app installation started.', 'online');
+      }
+    }
+  };
+
   const prefsLoadedRef = useRef(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const onboardingKey = `watchora_onboarding_${user.id}`;
@@ -1746,6 +1773,9 @@ function MainApp({
                       announce(error instanceof ApiError ? error.message : 'Could not delete reading entry.', 'error');
                     }
                   }}
+                  installPrompt={installPrompt}
+                  isInstalled={isInstalled}
+                  onInstallApp={handleInstallApp}
                 />
               </section>
             )}
@@ -2699,6 +2729,9 @@ function SettingsTab({
   onLogout,
   readingEntries,
   onDeleteReading,
+  installPrompt,
+  isInstalled,
+  onInstallApp,
 }: {
   user: PublicUser;
   language: string;
@@ -2718,6 +2751,9 @@ function SettingsTab({
   onLogout: () => void;
   readingEntries: ReadingEntry[] | null;
   onDeleteReading: (id: string) => void;
+  installPrompt?: any;
+  isInstalled?: boolean;
+  onInstallApp?: () => void;
 }) {
   // Group voices by language so the picker reads naturally (e.g. हिन्दी).
   const voiceGroups: Array<[string, TtsVoice[]]> = [];
@@ -2879,6 +2915,30 @@ function SettingsTab({
           <button className="secondary-btn" onClick={onLogout}>
             Log out
           </button>
+        </div>
+        <div className="settings-section">
+          <h3>Mobile App & PWA</h3>
+          {isInstalled ? (
+            <p className="muted-note" role="status" aria-live="polite">
+              <span aria-hidden="true">📱</span> Watchora is installed on this device.
+            </p>
+          ) : installPrompt ? (
+            <div>
+              <p className="muted-note">Install Watchora as a standalone mobile app for instant one-tap access and offline support.</p>
+              <button
+                className="primary-btn"
+                style={{ marginTop: 10, minHeight: 48 }}
+                onClick={onInstallApp}
+              >
+                <span aria-hidden="true">📲</span> Install Watchora App
+              </button>
+            </div>
+          ) : (
+            <p className="muted-note">
+              <strong>Android:</strong> Tap the browser menu (⋮) and tap <strong>“Install app”</strong> or <strong>“Add to Home screen”</strong>.<br />
+              <strong>iOS (iPhone / iPad):</strong> Tap the <strong>Share button</strong> (<span aria-hidden="true">⎙</span>) in Safari, then tap <strong>“Add to Home Screen”</strong>.
+            </p>
+          )}
         </div>
         <div className="settings-section">
           <h3>Reading history</h3>
