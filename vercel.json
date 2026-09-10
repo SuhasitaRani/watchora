@@ -2,6 +2,14 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/ai/generate",
+      "destination": "/api/ai/generate"
+    },
+    {
+      "source": "/api/ai/intent",
+      "destination": "/api/ai/intent"
+    },
+    {
       "source": "/api/tts/audio",
       "destination": "/api/tts/audio"
     },
