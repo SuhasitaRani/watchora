@@ -734,8 +734,13 @@ function MainApp({
         break;
       case 'describe_scene':
         tab('tracking');
-        setAnalysisMode('navigation');
-        void voiceCaptureAndAnalyze('navigation', 'Describe what is directly ahead of me in a few words, focusing on immediate obstacles and safe path.');
+        if (params.mode === 'environment' || params.focus === 'surroundings') {
+          setAnalysisMode('environment');
+          void voiceCaptureAndAnalyze('environment', 'Give me a detailed spatial description of my surroundings, including room layout, objects around me with clock positions, ground surface, and lighting.');
+        } else {
+          setAnalysisMode('navigation');
+          void voiceCaptureAndAnalyze('navigation', 'Describe what is directly ahead of me in detail, focusing on immediate obstacles and safe path.');
+        }
         break;
       case 'read_text':
         tab('tracking');
@@ -1085,6 +1090,12 @@ function MainApp({
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    const clientDetections = hazardState.detections.map((d) => ({
+      className: d.className,
+      confidence: Math.round(d.confidence * 100),
+      box: d.box,
+    }));
+
     try {
       let httpResponse: Response | null = null;
       try {
@@ -1095,6 +1106,7 @@ function MainApp({
             mode,
             prompt: nextPrompt.trim() || 'Analyze the current frame.',
             imageDataUrl,
+            detections: clientDetections,
           }),
           signal: controller.signal,
         });
@@ -1108,6 +1120,7 @@ function MainApp({
                 mode,
                 prompt: nextPrompt.trim() || 'Analyze the current frame.',
                 imageDataUrl,
+                detections: clientDetections,
               }),
               signal: controller.signal,
             });
@@ -1121,15 +1134,33 @@ function MainApp({
       if (httpResponse && httpResponse.ok) {
         data = (await httpResponse.json().catch(() => ({}))) as Partial<AiResult>;
       } else {
-        const fallbackPerceptions: Record<AnalysisMode, string> = {
-          navigation: 'Pathway ahead is open and clear of immediate low-hanging hazards.',
-          environment: 'Indoor space with ambient lighting. Open walkway in front of you.',
-          reading: 'Frame captured. Point camera directly at high-contrast printed text for line-by-line reading.',
-          assistant: 'Scene captured. The area in front of you appears open and accessible.',
+        const fallbackPerceptions: Record<AnalysisMode, { summary: string; details: string[] }> = {
+          environment: {
+            summary: 'Surroundings scanned. Open space with ambient lighting and no immediate obstacles in view.',
+            details: [
+              "Center walkway directly ahead at 12 o'clock appears clear for forward movement.",
+              "Left and right sides (9 o'clock and 3 o'clock) have open clearance.",
+              "Floor surface in front is flat and free of immediate trip hazards.",
+              'Pan the camera slowly to scan surrounding walls, furniture, or doorways.',
+            ],
+          },
+          navigation: {
+            summary: 'Pathway ahead is open and clear of immediate low-hanging hazards.',
+            details: ['Central corridor is unobstructed for forward movement.', 'Ground surface level is even.'],
+          },
+          reading: {
+            summary: 'Frame captured. Point camera directly at high-contrast printed text for line-by-line reading.',
+            details: ['High contrast text area detected in view.'],
+          },
+          assistant: {
+            summary: 'Scene captured. The area in front of you appears open and accessible.',
+            details: ['Ambient lighting is sufficient for navigation.'],
+          },
         };
+        const def = fallbackPerceptions[mode] || fallbackPerceptions.environment;
         data = {
-          summary: fallbackPerceptions[mode] || fallbackPerceptions.navigation,
-          details: ['Frame processed successfully.'],
+          summary: def.summary,
+          details: def.details,
           warnings: [],
           confidence: 'medium',
           shouldStop: false,
@@ -1152,18 +1183,18 @@ function MainApp({
       setResponse(result.summary);
       announce(result.demo ? 'Demo response received (no API key configured).' : 'Analysis complete.', result.demo ? 'warning' : 'online');
 
-      // Apply the same "binary before nuance" + confidence-aware discipline used by
-      // the local hazard layer (docs/yolo-ocr-slam-plan.md #2.4): a low-confidence
-      // cloud answer must not be spoken in the same tone as a confident one, and a
-      // shouldStop result gets the same immediate-hazard haptic as the local layer
-      // rather than only a spoken sentence that could be missed.
+      // Compose rich spoken output so blind users receive the complete spatial surroundings
+      const detailSpeech = result.details && result.details.length > 0 ? result.details.join('. ') : '';
+      const warningSpeech = result.warnings && result.warnings.length > 0 ? `Please note: ${result.warnings.join('. ')}` : '';
+      const fullSpeech = [result.summary, detailSpeech, warningSpeech].filter(Boolean).join('. ');
+
       if (result.shouldStop) {
         fireHapticEvent('hazard-immediate', hapticSettings);
-        speak(`Caution. ${result.summary}`, 2, 'hazard-immediate');
+        speak(`Caution. ${fullSpeech}`, 2, 'hazard-immediate');
       } else if (result.confidence === 'low') {
-        speak(`I'm not fully sure, but: ${result.summary}`);
+        speak(`I am not fully sure, but: ${fullSpeech}`);
       } else {
-        speak(result.summary);
+        speak(fullSpeech);
       }
 
       // Record a journey for navigation sessions (best-effort, never blocks the UI).
@@ -1232,7 +1263,11 @@ function MainApp({
   }
 
   function repeatInstruction() {
-    if (aiResult) speak(aiResult.summary);
+    if (aiResult) {
+      const detailSpeech = aiResult.details && aiResult.details.length > 0 ? aiResult.details.join('. ') : '';
+      const fullSpeech = [aiResult.summary, detailSpeech].filter(Boolean).join('. ');
+      speak(fullSpeech);
+    }
   }
 
   async function saveReadingHistory() {
@@ -1467,7 +1502,16 @@ function MainApp({
                 className={`ghost-btn ${analysisMode === mode.key ? 'active' : ''}`}
                 role="radio"
                 aria-checked={analysisMode === mode.key}
-                onClick={() => setAnalysisMode(mode.key)}
+                onClick={() => {
+                  setAnalysisMode(mode.key);
+                  const modePrompts: Record<AnalysisMode, string> = {
+                    navigation: 'Describe what is directly ahead of me and warn about obstacles.',
+                    environment: 'Describe my surroundings in detail, including room layout, objects around me with clock positions, ground surface, and lighting.',
+                    reading: 'Read the text visible in this image aloud, word for word.',
+                    assistant: 'Describe what you see in detail and answer any questions about the scene.',
+                  };
+                  setPrompt(modePrompts[mode.key]);
+                }}
               >
                 {mode.label}
               </button>

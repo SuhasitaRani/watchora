@@ -94,8 +94,11 @@ export function matchDeterministicCommand(transcript: string): VoiceIntent | nul
   }
 
   // ── Assistance ──
-  if (has(t, 'describe what is ahead', 'what is ahead', 'what is in front', 'describe the scene', 'describe my surroundings', 'what is around me', 'what objects are near')) {
-    return intent('describe_scene', {}, false, 1);
+  if (has(t, 'describe my surroundings', 'describe surroundings', 'what is around me', 'what is in this room', 'tell me about this room', 'what objects are near', 'describe environment', 'surroundings', 'what is here')) {
+    return intent('describe_scene', { mode: 'environment' }, false, 1);
+  }
+  if (has(t, 'describe what is ahead', 'what is ahead', 'what is in front', 'describe the scene', 'what do you see')) {
+    return intent('describe_scene', { mode: 'navigation' }, false, 1);
   }
   if (has(t, 'read this', 'read the text', 'read text', 'read what is here', 'read the sign')) {
     return intent('read_text', {}, false, 1);

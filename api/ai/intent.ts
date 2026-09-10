@@ -29,8 +29,12 @@ export default async function handler(req: any, res: any) {
     res.status(200).json({ intent: 'emergency', parameters: {}, confidence: 1.0, requiresConfirmation: true });
     return;
   }
-  if (transcript.includes('describe') || transcript.includes('what is ahead') || transcript.includes('surroundings')) {
-    res.status(200).json({ intent: 'describe_scene', parameters: {}, confidence: 0.95, requiresConfirmation: false });
+  if (transcript.includes('surroundings') || transcript.includes('around me') || transcript.includes('this room') || transcript.includes('environment')) {
+    res.status(200).json({ intent: 'describe_scene', parameters: { mode: 'environment' }, confidence: 0.95, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('describe') || transcript.includes('what is ahead') || transcript.includes('what do you see')) {
+    res.status(200).json({ intent: 'describe_scene', parameters: { mode: 'navigation' }, confidence: 0.95, requiresConfirmation: false });
     return;
   }
   if (transcript.includes('read') || transcript.includes('text')) {
