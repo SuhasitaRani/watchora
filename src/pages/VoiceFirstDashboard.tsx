@@ -20,6 +20,9 @@ export function VoiceFirstDashboard({
   onCancelEmergency,
   onResolveEmergency,
   speak,
+  installPrompt,
+  isInstalled,
+  onInstallApp,
 }: {
   permissionService: PermissionService;
   emergency: EmergencyStatus;
@@ -31,6 +34,9 @@ export function VoiceFirstDashboard({
   onCancelEmergency: () => void;
   onResolveEmergency: () => void;
   speak: (text: string, priority?: number, dedupeKey?: string) => void;
+  installPrompt?: any;
+  isInstalled?: boolean;
+  onInstallApp?: () => void;
 }) {
   return (
     <div className="voice-dashboard">
@@ -75,6 +81,33 @@ export function VoiceFirstDashboard({
         </div>
         <PermissionStatusCard service={permissionService} onOpen={onOpenPermissions} />
       </section>
+
+      {!isInstalled && (
+        <section className="mobile-download-banner panel" style={{ marginTop: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: '1.8rem' }} aria-hidden="true">📱</span>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Download Watchora Mobile App</h3>
+              <p className="muted-note" style={{ margin: '4px 0 0' }}>Install as a standalone native app on your phone for instant launch and offline vision assistance.</p>
+            </div>
+          </div>
+          {installPrompt ? (
+            <button
+              className="primary-btn"
+              style={{ minHeight: 48, marginTop: 8 }}
+              onClick={onInstallApp}
+              aria-label="Install Watchora Mobile App on this device"
+            >
+              <span aria-hidden="true">📲</span> 1-Tap Install on Mobile Phone
+            </button>
+          ) : (
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: 10, fontSize: '0.88rem' }}>
+              <p style={{ margin: '0 0 4px' }}><strong>Android:</strong> Open in Chrome, tap <strong>(⋮)</strong> and select <strong>“Install app”</strong> or <strong>“Add to Home screen”</strong>.</p>
+              <p style={{ margin: 0 }}><strong>iPhone (iOS):</strong> Open in Safari, tap <strong>Share</strong> (<span aria-hidden="true">⎙</span>), then tap <strong>“Add to Home Screen”</strong>.</p>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="primary-cards">
         <PrimaryActionCard

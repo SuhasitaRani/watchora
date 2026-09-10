@@ -1755,6 +1755,9 @@ function MainApp({
                   onCancelEmergency={() => {}}
                   onResolveEmergency={() => {}}
                   speak={speak as (text: string, priority?: number, dedupeKey?: string) => void}
+                  installPrompt={installPrompt}
+                  isInstalled={isInstalled}
+                  onInstallApp={handleInstallApp}
                 />
               </section>
             )}

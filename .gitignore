@@ -7,3 +7,9 @@ dist/
 .claude-flow/
 server/.claude-flow/
 .audit/
+.gradle/
+android/app/build/
+android/build/
+android/.gradle/
+android/captures/
+android/local.properties
