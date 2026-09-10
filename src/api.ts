@@ -209,8 +209,12 @@ export type EmergencySession = {
 
 export function localeFromVoice(shortName: string): string {
   if (shortName.startsWith('sarvam-')) {
-    if (shortName.includes('vidya')) return 'ta-IN';
+    if (shortName.includes('vidya') || shortName.includes('kavya')) return 'ta-IN';
     if (shortName.includes('rahul')) return 'te-IN';
+    if (shortName.includes('shreya') || shortName.includes('amit')) return 'bn-IN';
+    if (shortName.includes('pooja') || shortName.includes('rohan')) return 'mr-IN';
+    if (shortName.includes('simran')) return 'gu-IN';
+    if (shortName.includes('ashutosh')) return 'hi-IN';
     return 'hi-IN';
   }
   const m = /^([a-z]{2}-[A-Z]{2})/.exec(shortName);
@@ -550,6 +554,16 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
   if (path === '/api/caregiver/overview') return { peopleCount: 1, openSosCount: 0, recentJourneys: [], contacts: [] } as T;
   if (path === '/api/tts/voices') {
     const list: TtsVoice[] = [
+      // Sarvam AI Neural Voices
+      { shortName: 'sarvam-priya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'प्रिया (हिन्दी)', gender: 'Female' },
+      { shortName: 'sarvam-aditya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आदित्य (हिन्दी)', gender: 'Male' },
+      { shortName: 'sarvam-neha', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'नेहा (हिन्दी)', gender: 'Female' },
+      { shortName: 'sarvam-kavya', locale: 'ta-IN', language: 'Tamil (Sarvam AI)', native: 'காவ்யா (தமிழ்)', gender: 'Female' },
+      { shortName: 'sarvam-rahul', locale: 'te-IN', language: 'Telugu (Sarvam AI)', native: 'రాహుల్ (తెలుగు)', gender: 'Male' },
+      { shortName: 'sarvam-shreya', locale: 'bn-IN', language: 'Bengali (Sarvam AI)', native: 'শ্রেয়া (বাংলা)', gender: 'Female' },
+      { shortName: 'sarvam-pooja', locale: 'mr-IN', language: 'Marathi (Sarvam AI)', native: 'पूजा (मराठी)', gender: 'Female' },
+      { shortName: 'sarvam-simran', locale: 'gu-IN', language: 'Gujarati (Sarvam AI)', native: 'સિમરન (ગુજરાતી)', gender: 'Female' },
+      // Edge Neural Voices
       { shortName: 'en-US-JennyNeural', locale: 'en-US', language: 'English (US)', native: 'English (US)', gender: 'Female' },
       { shortName: 'en-US-GuyNeural', locale: 'en-US', language: 'English (US)', native: 'English (US)', gender: 'Male' },
       { shortName: 'en-GB-LibbyNeural', locale: 'en-GB', language: 'English (UK)', native: 'English (UK)', gender: 'Female' },
@@ -706,12 +720,28 @@ export const api = {
     const token = getToken();
     const params = new URLSearchParams({ text, voice, rate: String(rate) });
     const url = `${API_BASE_URL}/api/tts/audio?${params.toString()}`;
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok && API_BASE_URL) {
+        res = await fetch(`/api/tts/audio?${params.toString()}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+      }
+    } catch {
+      if (API_BASE_URL) {
+        res = await fetch(`/api/tts/audio?${params.toString()}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+      } else {
+        throw new ApiError('Failed to fetch audio from speech service', 502);
+      }
+    }
     if (!res.ok) throw new ApiError(`Speech service returned status ${res.status}`, res.status);
     const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('audio') && !contentType.includes('mpeg') && !contentType.includes('octet-stream')) {
+    if (!contentType.includes('audio') && !contentType.includes('mpeg') && !contentType.includes('wav') && !contentType.includes('octet-stream')) {
       throw new ApiError('Speech response is not valid audio', 502);
     }
     const blob = await res.blob();

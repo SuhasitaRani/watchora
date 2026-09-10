@@ -150,13 +150,15 @@ export function PermissionOnboarding({
                 }}
               >
                 <optgroup label="Sarvam AI (Indian Neural Voices)">
-                  <option value="sarvam-anushka">👩 Hindi — Anushka (अनुष्का / Sarvam AI)</option>
-                  <option value="sarvam-abhilash">👨 Hindi — Abhilash (अभिलाष / Sarvam AI)</option>
-                  <option value="sarvam-aditya">👨 Hindi — Aditya (आदित्य / Sarvam v3)</option>
                   <option value="sarvam-priya">👩 Hindi — Priya (प्रिया / Sarvam v3)</option>
-                  <option value="sarvam-manisha">👩 Hindi — Manisha (मनीषा / Sarvam AI)</option>
-                  <option value="sarvam-vidya">👩 Tamil — Vidya (வித்யா / Sarvam AI)</option>
-                  <option value="sarvam-rahul">👨 Telugu — Rahul (రాహుల్ / Sarvam AI)</option>
+                  <option value="sarvam-aditya">👨 Hindi — Aditya (आदित्य / Sarvam v3)</option>
+                  <option value="sarvam-neha">👩 Hindi — Neha (नेहा / Sarvam v3)</option>
+                  <option value="sarvam-kavya">👩 Tamil — Kavya (காவ்யா / Sarvam v3)</option>
+                  <option value="sarvam-rahul">👨 Telugu — Rahul (రాహుల్ / Sarvam v3)</option>
+                  <option value="sarvam-shreya">👩 Bengali — Shreya (শ্রেয়া / Sarvam v3)</option>
+                  <option value="sarvam-pooja">👩 Marathi — Pooja (पूजा / Sarvam v3)</option>
+                  <option value="sarvam-simran">👩 Gujarati — Simran (સિમરન / Sarvam v3)</option>
+                  <option value="sarvam-ashutosh">👨 Hindi — Ashutosh (आशुतोष / Sarvam v3)</option>
                 </optgroup>
                 <optgroup label="Indian Languages (Edge Neural)">
                   <option value="hi-IN-SwaraNeural">👩 Hindi — Swara (हिन्दी)</option>

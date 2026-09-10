@@ -519,7 +519,6 @@ function MainApp({
                   ttsUrlRef.current = null;
                 }
                 setSpeechActive(false);
-                fallbackSpeak(t, locale, effectiveRate);
                 speechManagerRef.current?.onEnded();
               };
               audio.onerror = () => {
@@ -975,7 +974,8 @@ function MainApp({
     if (!RecognitionCtor) return null;
 
     const recognition = new RecognitionCtor();
-    recognition.lang = language === 'English' ? 'en-US' : language === 'Vietnamese' ? 'vi-VN' : 'es-ES';
+    const currentLocale = localeFromVoice(voice);
+    recognition.lang = currentLocale || (language === 'English' ? 'en-US' : 'hi-IN');
     recognition.continuous = false;
     recognition.interimResults = true;
 
@@ -1852,6 +1852,8 @@ function MainApp({
                   voices={voices}
                   onVoiceChange={(v) => {
                     setVoice(v);
+                    const newLocale = localeFromVoice(v);
+                    voiceAssistant.setSettings({ voice: v, language: newLocale.split('-')[0] });
                     speak(getVoiceTestPhrase(v), 4, 'voice-change-test', voiceRate);
                   }}
                   onTestVoice={() => speak(getVoiceTestPhrase(voice), 4, 'test-voice-btn', voiceRate)}
@@ -1941,7 +1943,11 @@ function MainApp({
             localStorage.setItem(onboardingKey, '1');
             setVoiceRate(result.speechRate);
             const chosenVoice = result.selectedVoice || voice;
-            if (result.selectedVoice) setVoice(result.selectedVoice);
+            if (result.selectedVoice) {
+              setVoice(result.selectedVoice);
+              const newLocale = localeFromVoice(result.selectedVoice);
+              voiceAssistant.setSettings({ voice: result.selectedVoice, language: newLocale.split('-')[0] });
+            }
             setHapticSettings({
               hapticsEnabled: result.hapticsEnabled,
               toneEnabled: result.toneEnabled,

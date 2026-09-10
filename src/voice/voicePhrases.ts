@@ -1,7 +1,11 @@
 export function getLangFromVoice(voiceName: string): string {
   if (voiceName.startsWith('sarvam-')) {
-    if (voiceName.includes('vidya')) return 'ta';
+    if (voiceName.includes('vidya') || voiceName.includes('kavya')) return 'ta';
     if (voiceName.includes('rahul')) return 'te';
+    if (voiceName.includes('shreya') || voiceName.includes('amit')) return 'bn';
+    if (voiceName.includes('pooja') || voiceName.includes('rohan')) return 'mr';
+    if (voiceName.includes('simran')) return 'gu';
+    if (voiceName.includes('ashutosh')) return 'hi';
     return 'hi';
   }
   const m = /^([a-z]{2})-[A-Z]{2}/.exec(voiceName);

@@ -9,14 +9,16 @@ export default async function handler(req: any, res: any) {
   }
 
   const voices = [
-    // Sarvam AI Indian Neural Voices (bulbul:v2 & bulbul:v3)
-    { shortName: 'sarvam-anushka', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'अनुष्का (हिन्दी)', gender: 'Female' },
-    { shortName: 'sarvam-abhilash', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'अभिलाष (हिन्दी)', gender: 'Male' },
-    { shortName: 'sarvam-aditya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आदित्य (हिन्दी)', gender: 'Male' },
+    // Sarvam AI Indian Neural Voices (bulbul:v3)
     { shortName: 'sarvam-priya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'प्रिया (हिन्दी)', gender: 'Female' },
-    { shortName: 'sarvam-manisha', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'मनीषा (हिन्दी)', gender: 'Female' },
-    { shortName: 'sarvam-vidya', locale: 'ta-IN', language: 'Tamil (Sarvam AI)', native: 'வித்யா (தமிழ்)', gender: 'Female' },
+    { shortName: 'sarvam-aditya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आदित्य (हिन्दी)', gender: 'Male' },
+    { shortName: 'sarvam-neha', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'नेहा (हिन्दी)', gender: 'Female' },
+    { shortName: 'sarvam-kavya', locale: 'ta-IN', language: 'Tamil (Sarvam AI)', native: 'காவ்யா (தமிழ்)', gender: 'Female' },
     { shortName: 'sarvam-rahul', locale: 'te-IN', language: 'Telugu (Sarvam AI)', native: 'రాహుల్ (తెలుగు)', gender: 'Male' },
+    { shortName: 'sarvam-shreya', locale: 'bn-IN', language: 'Bengali (Sarvam AI)', native: 'শ্রেয়া (বাংলা)', gender: 'Female' },
+    { shortName: 'sarvam-pooja', locale: 'mr-IN', language: 'Marathi (Sarvam AI)', native: 'पूजा (मराठी)', gender: 'Female' },
+    { shortName: 'sarvam-simran', locale: 'gu-IN', language: 'Gujarati (Sarvam AI)', native: 'સિમરન (ગુજરાતી)', gender: 'Female' },
+    { shortName: 'sarvam-ashutosh', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आशुतोष (हिन्दी)', gender: 'Male' },
 
     // Microsoft Edge Indian Neural Voices
     { shortName: 'hi-IN-SwaraNeural', locale: 'hi-IN', language: 'Hindi', native: 'स्वरा (हिन्दी)', gender: 'Female' },

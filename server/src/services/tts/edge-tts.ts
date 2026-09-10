@@ -231,8 +231,9 @@ function synthesizeChunk(text: string, options: SynthOptions): Promise<Buffer> {
         },
       });
       ws.send(`X-Timestamp:${new Date().toUTCString()}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n${config}`, { compress: true });
+      const locale = /^([a-z]{2}-[A-Z]{2})/.exec(options.voice)?.[1] ?? 'en-US';
       const ssml =
-        `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>` +
+        `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${locale}'>` +
         `<voice name='${escXml(options.voice)}'>` +
         `<prosody pitch='${options.pitch ?? '+0Hz'}' rate='${rateToSsml(options.rate ?? 1)}' volume='${options.volume ?? '+0%'}'>` +
         `${escXml(text)}</prosody></voice></speak>`;
