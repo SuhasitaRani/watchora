@@ -158,36 +158,66 @@ export function matchDeterministicCommand(transcript: string): VoiceIntent | nul
     return intent('change_setting', { setting: 'language', value: 'en' }, false, 1);
   }
 
+  // ── Camera controls ──
+  if (has(t, 'stop camera', 'turn off camera', 'close camera', 'disconnect camera', 'disable camera')) {
+    return intent('stop_camera', {}, false, 1);
+  }
+  if (has(t, 'start camera', 'open camera', 'turn on camera', 'connect camera', 'enable camera')) {
+    return intent('start_camera', {}, false, 1);
+  }
+  if (has(t, 'capture and analyze', 'capture frame', 'capture image', 'take photo', 'take picture', 'analyze this', 'analyze scene', 'what do you see')) {
+    return intent('capture_frame', {}, false, 1);
+  }
+
+  // ── Theme controls ──
+  if (has(t, 'dark mode', 'dark theme', 'switch to dark', 'turn on dark mode')) {
+    return intent('toggle_theme', { theme: 'Dark' }, false, 1);
+  }
+  if (has(t, 'light mode', 'light theme', 'switch to light', 'turn on light mode')) {
+    return intent('toggle_theme', { theme: 'Light' }, false, 1);
+  }
+
   // ── Open tabs / navigation between screens ──
-  if (has(t, 'go home', 'open home', 'open the home screen', 'open dashboard')) {
+  if (has(t, 'go home', 'open home', 'open the home screen', 'open dashboard', 'home screen', 'go to home')) {
     return intent('open_tab', { tab: 'home' }, false, 1);
   }
-  if (has(t, 'open assist', 'open the camera', 'open camera', 'start camera')) {
+  if (has(t, 'open assist', 'go to assist', 'vision assist', 'assist screen', 'open visual assist')) {
     return intent('open_tab', { tab: 'tracking' }, false, 1);
   }
-  if (has(t, 'open safe journey', 'open journey')) {
+  if (has(t, 'open safe journey', 'open journey', 'go to journey', 'safe travel', 'travel mode')) {
     return intent('open_tab', { tab: 'journey' }, false, 1);
   }
-  if (has(t, 'open emergency', 'open sos', 'open safety')) {
+  if (has(t, 'open emergency', 'open sos', 'open safety', 'go to emergency', 'go to sos', 'safety hub')) {
     return intent('open_tab', { tab: 'sos' }, false, 1);
   }
-  if (has(t, 'open reading', 'open read')) {
+  if (has(t, 'open reading', 'open read', 'go to reading', 'reading mode')) {
     return intent('open_tab', { tab: 'tracking', mode: 'reading' }, false, 1);
   }
-  if (has(t, 'open saved places', 'open places', 'open my places')) {
+  if (has(t, 'open saved places', 'open places', 'open my places', 'go to saved places', 'my places')) {
     return intent('open_tab', { tab: 'routes' }, false, 1);
   }
-  if (has(t, 'open trusted contacts', 'open contacts', 'open my contacts')) {
+  if (has(t, 'open trusted contacts', 'open contacts', 'open my contacts', 'go to contacts', 'trusted contacts')) {
     return intent('open_tab', { tab: 'sos', section: 'contacts' }, false, 1);
   }
-  if (has(t, 'open settings')) {
+  if (has(t, 'open settings', 'go to settings', 'app settings', 'preferences')) {
     return intent('open_tab', { tab: 'settings' }, false, 1);
   }
-  if (has(t, 'open community', 'open reports')) {
+  if (has(t, 'open community', 'open reports', 'go to community', 'community reports', 'hazard reports')) {
     return intent('open_tab', { tab: 'community' }, false, 1);
   }
-  if (has(t, 'what can i do', 'what can you do', 'help', 'what commands')) {
+  if (has(t, 'open caregiver', 'go to caregiver', 'caregiver portal', 'caregiver')) {
+    return intent('open_tab', { tab: 'caregiver' }, false, 1);
+  }
+  if (has(t, 'open admin', 'go to admin', 'admin panel', 'admin dashboard')) {
+    return intent('open_tab', { tab: 'admin' }, false, 1);
+  }
+  if (has(t, 'what can i do', 'what can you do', 'help', 'what commands', 'list commands', 'voice commands')) {
     return intent('help', {}, false, 1);
+  }
+
+  // ── Account / Logout ──
+  if (has(t, 'log out', 'logout', 'sign out', 'signout')) {
+    return intent('logout', {}, true, 1);
   }
 
   // ── Saved places / hazards ──

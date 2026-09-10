@@ -34,6 +34,7 @@ import { PermissionService } from './permissions/permissionService';
 import { PermissionOnboarding, type OnboardingResult } from './permissions/PermissionOnboarding';
 import { PermissionCenter } from './permissions/PermissionCenter';
 import { VoiceAssistantProvider, useVoiceAssistant } from './voice/VoiceAssistantProvider';
+import { VoiceControlButton } from './voice/VoiceControlButton';
 import type { VoiceSettings } from './voice/voiceTypes';
 import { VoiceFirstDashboard, type DashboardTab } from './pages/VoiceFirstDashboard';
 import { PermissionSettings } from './pages/PermissionSettings';
@@ -731,6 +732,37 @@ function MainApp({
         tab('sos');
         speak('Cancelling emergency. Say confirm to cancel, or cancel to abort.', 1, 'emergency-cancel-voice');
         voiceEmergencyRef.current?.();
+        break;
+      case 'start_camera':
+        tab('tracking');
+        if (!cameraActive) {
+          startCamera();
+          speak('Starting the camera and scanning.', 4, 'voice-cam-start');
+        } else {
+          speak('Camera is already running.', 5, 'voice-cam-already');
+        }
+        break;
+      case 'stop_camera':
+        if (cameraActive) {
+          stopCamera();
+          speak('Camera stopped.', 4, 'voice-cam-stop');
+        } else {
+          speak('Camera is already stopped.', 5, 'voice-cam-already-stopped');
+        }
+        break;
+      case 'capture_frame':
+        tab('tracking');
+        void voiceCaptureAndAnalyze(analysisMode, prompt);
+        break;
+      case 'toggle_theme': {
+        const nextTheme = (params.theme === 'Dark' || params.theme === 'Light') ? params.theme : (themeMode === 'Dark' ? 'Light' : 'Dark');
+        setThemeMode(nextTheme);
+        speak(`${nextTheme} mode on.`, 5, 'voice-theme');
+        break;
+      }
+      case 'logout':
+        onLogout();
+        speak('Logged out.', 4, 'voice-logout');
         break;
       case 'describe_scene':
         tab('tracking');
@@ -1731,6 +1763,7 @@ function MainApp({
               <h1>{activeLabel}</h1>
             </div>
             <div className="topbar-actions">
+              <VoiceControlButton className="topbar-voice-btn" />
               <button className="primary-btn sos-inline" onClick={() => setActiveTab('sos')}>
                 <span aria-hidden="true">🚨</span> SOS
               </button>

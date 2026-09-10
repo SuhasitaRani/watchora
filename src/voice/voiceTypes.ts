@@ -3,6 +3,9 @@
 export type VoiceIntentName =
   | 'describe_scene'
   | 'read_text'
+  | 'start_camera'
+  | 'stop_camera'
+  | 'capture_frame'
   | 'start_navigation'
   | 'start_safe_journey'
   | 'stop_safe_journey'
@@ -22,6 +25,7 @@ export type VoiceIntentName =
   | 'more_detail'
   | 'shorter_answer'
   | 'change_setting'
+  | 'toggle_theme'
   | 'permission_status'
   | 'open_tab'
   | 'help'
@@ -32,6 +36,7 @@ export type VoiceIntentName =
   | 'save_place'
   | 'set_coach_mode'
   | 'shopping'
+  | 'logout'
   | 'unknown';
 
 export interface VoiceIntent {
@@ -52,6 +57,7 @@ export const CONFIRMATION_REQUIRED: VoiceIntentName[] = [
   'contact_trusted_person',
   'save_place',
   'report_hazard',
+  'logout',
 ];
 
 /** Safety-critical intents that take highest speech priority (1). */
@@ -95,7 +101,7 @@ export interface ConfirmationRequest {
 }
 
 export const HELP_MESSAGE =
-  'You can say: describe what is ahead, read this, start a safe journey, emergency, check my permissions, or open settings.';
+  'Watchora voice commands include: Describe my surroundings, describe what is ahead, read text, start or stop camera, capture and analyze, start a safe journey, where am I, share location, emergency, repeat, open saved places, dark mode, speak faster or slower, and log out.';
 
 /** Spoken once per session when hands-free voice control arms successfully. */
 export const HANDS_FREE_ONBOARDING =
