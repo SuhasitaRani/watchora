@@ -524,6 +524,381 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
     return { entry: newEntry } as T;
   }
 
+  if (path === '/api/assistance') {
+    if (method === 'GET') {
+      const requests = JSON.parse(localStorage.getItem('watchora_demo_assistance') || '[]');
+      return { requests } as T;
+    }
+    const requests = JSON.parse(localStorage.getItem('watchora_demo_assistance') || '[]');
+    const newReq: AssistanceRequest = {
+      id: `ast_${Date.now()}`,
+      message: body.message || 'I need help.',
+      status: 'PENDING',
+      locationShare: Boolean(body.locationShare),
+      createdAt: new Date().toISOString(),
+      resolvedAt: null,
+    };
+    requests.unshift(newReq);
+    localStorage.setItem('watchora_demo_assistance', JSON.stringify(requests));
+    return { request: newReq } as T;
+  }
+
+  if (path.startsWith('/api/assistance/') && path.endsWith('/resolve')) {
+    const id = path.split('/')[3];
+    const requests: AssistanceRequest[] = JSON.parse(localStorage.getItem('watchora_demo_assistance') || '[]');
+    const target = requests.find((r) => r.id === id);
+    if (target) {
+      target.status = 'RESOLVED';
+      target.resolvedAt = new Date().toISOString();
+      localStorage.setItem('watchora_demo_assistance', JSON.stringify(requests));
+      return { request: target } as T;
+    }
+    return {
+      request: {
+        id,
+        message: 'Assistance request',
+        status: 'RESOLVED',
+        locationShare: true,
+        createdAt: new Date().toISOString(),
+        resolvedAt: new Date().toISOString(),
+      },
+    } as T;
+  }
+
+  if (path === '/api/consents') {
+    if (method === 'GET') {
+      const consents: ConsentGrant[] = JSON.parse(localStorage.getItem('watchora_demo_consents') || '[]');
+      return { consents } as T;
+    }
+    const consents: ConsentGrant[] = JSON.parse(localStorage.getItem('watchora_demo_consents') || '[]');
+    const newConsent: ConsentGrant = {
+      id: `cns_${Date.now()}`,
+      scope: body.scope || 'LOCATION_SHARING',
+      grantedAt: new Date().toISOString(),
+      revokedAt: null,
+      metadata: body.metadata || null,
+    };
+    consents.push(newConsent);
+    localStorage.setItem('watchora_demo_consents', JSON.stringify(consents));
+    return { consent: newConsent } as T;
+  }
+
+  if (path.startsWith('/api/consents/')) {
+    const id = path.split('/')[3];
+    const consents: ConsentGrant[] = JSON.parse(localStorage.getItem('watchora_demo_consents') || '[]');
+    const target = consents.find((c) => c.id === id);
+    if (target) {
+      target.revokedAt = new Date().toISOString();
+      localStorage.setItem('watchora_demo_consents', JSON.stringify(consents));
+      return { consent: target } as T;
+    }
+    return { consent: { id, scope: 'LOCATION_SHARING', grantedAt: new Date().toISOString(), revokedAt: new Date().toISOString(), metadata: null } } as T;
+  }
+
+  if (path === '/api/journeys') {
+    if (method === 'GET') {
+      const journeys: Journey[] = JSON.parse(localStorage.getItem('watchora_demo_journeys') || '[]');
+      return { journeys } as T;
+    }
+    const journeys: Journey[] = JSON.parse(localStorage.getItem('watchora_demo_journeys') || '[]');
+    const newJ: Journey = {
+      id: `jrn_${Date.now()}`,
+      destination: body.destination || 'Destination',
+      mode: body.mode || 'WALKING',
+      startedAt: new Date().toISOString(),
+      endedAt: null,
+    };
+    journeys.unshift(newJ);
+    localStorage.setItem('watchora_demo_journeys', JSON.stringify(journeys));
+    return { journey: newJ } as T;
+  }
+
+  if (path === '/api/safe-journey') {
+    const newJourney: SafeJourney = {
+      id: `jrn_${Date.now()}`,
+      destination: body.destination || 'Destination',
+      status: 'ACTIVE',
+      startedAt: new Date().toISOString(),
+      eta: body.eta || null,
+      checkInIntervalMinutes: body.checkInIntervalMinutes || 15,
+      shareLive: body.shareLive !== false,
+      deviationThresholdMeters: body.deviationThresholdMeters || 100,
+      trustedContactId: body.trustedContactId || null,
+      trustedContact: body.trustedContactId ? { id: body.trustedContactId, name: 'Trusted Contact' } : null,
+      lastLat: 28.6139,
+      lastLng: 77.209,
+      lastAccuracy: 10,
+      lastBearing: null,
+      lastLocationAt: new Date().toISOString(),
+      lastCheckInAt: new Date().toISOString(),
+      promptCount: 0,
+      escalatedAt: null,
+      safetyState: 'ok',
+      promptDue: false,
+      missedArrival: false,
+    };
+    localStorage.setItem('watchora_demo_active_journey', JSON.stringify(newJourney));
+    return { journey: newJourney } as T;
+  }
+
+  if (path === '/api/safe-journey/active') {
+    const stored = localStorage.getItem('watchora_demo_active_journey');
+    const journey: SafeJourney | null = stored ? JSON.parse(stored) : null;
+    return { journey } as T;
+  }
+
+  if (path === '/api/safe-journey/history') {
+    const journeys: SafeJourney[] = JSON.parse(localStorage.getItem('watchora_demo_journey_history') || '[]');
+    return { journeys } as T;
+  }
+
+  if (path.startsWith('/api/safe-journey/') && path.endsWith('/location')) {
+    return { ok: true } as T;
+  }
+
+  if (path.startsWith('/api/safe-journey/') && path.endsWith('/deviation')) {
+    return { ok: true, deviationMeters: 0, threshold: 100, action: 'none' } as T;
+  }
+
+  if (path.startsWith('/api/safe-journey/') && path.endsWith('/check-in')) {
+    const stored = localStorage.getItem('watchora_demo_active_journey');
+    if (stored) {
+      const j: SafeJourney = JSON.parse(stored);
+      j.lastCheckInAt = new Date().toISOString();
+      j.safetyState = 'ok';
+      j.promptDue = false;
+      localStorage.setItem('watchora_demo_active_journey', JSON.stringify(j));
+      return { journey: j } as T;
+    }
+    return {
+      journey: {
+        id: path.split('/')[3],
+        destination: 'Destination',
+        status: 'ACTIVE',
+        startedAt: new Date().toISOString(),
+        eta: null,
+        checkInIntervalMinutes: 15,
+        shareLive: true,
+        deviationThresholdMeters: 100,
+        trustedContactId: null,
+        trustedContact: null,
+        lastLat: null,
+        lastLng: null,
+        lastAccuracy: null,
+        lastBearing: null,
+        lastLocationAt: null,
+        lastCheckInAt: new Date().toISOString(),
+        promptCount: 0,
+        escalatedAt: null,
+        safetyState: 'ok',
+        promptDue: false,
+        missedArrival: false,
+      },
+    } as T;
+  }
+
+  if (path.startsWith('/api/safe-journey/') && path.endsWith('/lost')) {
+    return { ok: true } as T;
+  }
+
+  if (path.startsWith('/api/safe-journey/') && path.endsWith('/end')) {
+    const stored = localStorage.getItem('watchora_demo_active_journey');
+    if (stored) {
+      const j: SafeJourney = JSON.parse(stored);
+      j.status = 'COMPLETED';
+      localStorage.removeItem('watchora_demo_active_journey');
+      const hist: SafeJourney[] = JSON.parse(localStorage.getItem('watchora_demo_journey_history') || '[]');
+      hist.unshift(j);
+      localStorage.setItem('watchora_demo_journey_history', JSON.stringify(hist));
+      return { journey: j } as T;
+    }
+    return {
+      journey: {
+        id: path.split('/')[3],
+        destination: 'Destination',
+        status: 'COMPLETED',
+        startedAt: new Date().toISOString(),
+        eta: null,
+        checkInIntervalMinutes: 15,
+        shareLive: true,
+        deviationThresholdMeters: 100,
+        trustedContactId: null,
+        trustedContact: null,
+        lastLat: null,
+        lastLng: null,
+        lastAccuracy: null,
+        lastBearing: null,
+        lastLocationAt: null,
+        lastCheckInAt: null,
+        promptCount: 0,
+        escalatedAt: null,
+        safetyState: 'ok',
+        promptDue: false,
+        missedArrival: false,
+      },
+    } as T;
+  }
+
+  if (path === '/api/emergency') {
+    const newSession: EmergencySession = {
+      id: `sos_${Date.now()}`,
+      status: 'ACTIVE',
+      triggeredAt: new Date().toISOString(),
+      cancelledAt: null,
+      resolvedAt: null,
+      expiresAt: new Date(Date.now() + 3600000).toISOString(),
+      lat: body.lat ?? 28.6139,
+      lng: body.lng ?? 77.209,
+      accuracy: body.accuracy ?? 10,
+      battery: body.battery ?? 80,
+      heading: body.heading ?? 0,
+      speed: body.speed ?? 0,
+      mapsUrl: `https://www.google.com/maps?q=${body.lat ?? 28.6139},${body.lng ?? 77.209}`,
+      journeyId: body.journeyId || null,
+      acknowledgements: [],
+    };
+    localStorage.setItem('watchora_demo_active_emergency', JSON.stringify(newSession));
+    return { session: newSession, cancelWindowSeconds: 10 } as T;
+  }
+
+  if (path === '/api/emergency/active') {
+    const stored = localStorage.getItem('watchora_demo_active_emergency');
+    const session: EmergencySession | null = stored ? JSON.parse(stored) : null;
+    return { session } as T;
+  }
+
+  if (path.startsWith('/api/emergency/') && path.endsWith('/cancel')) {
+    localStorage.removeItem('watchora_demo_active_emergency');
+    return {
+      session: {
+        id: path.split('/')[3],
+        status: 'CANCELLED',
+        triggeredAt: new Date().toISOString(),
+        cancelledAt: new Date().toISOString(),
+        resolvedAt: null,
+        expiresAt: null,
+        lat: null,
+        lng: null,
+        accuracy: null,
+        battery: null,
+        heading: null,
+        speed: null,
+        mapsUrl: null,
+        journeyId: null,
+        acknowledgements: [],
+      },
+    } as T;
+  }
+
+  if (path.startsWith('/api/emergency/') && path.endsWith('/resolve')) {
+    localStorage.removeItem('watchora_demo_active_emergency');
+    return {
+      session: {
+        id: path.split('/')[3],
+        status: 'RESOLVED',
+        triggeredAt: new Date().toISOString(),
+        cancelledAt: null,
+        resolvedAt: new Date().toISOString(),
+        expiresAt: null,
+        lat: null,
+        lng: null,
+        accuracy: null,
+        battery: null,
+        heading: null,
+        speed: null,
+        mapsUrl: null,
+        journeyId: null,
+        acknowledgements: [],
+      },
+    } as T;
+  }
+
+  if (path.startsWith('/api/emergency/') && path.endsWith('/location')) {
+    return {
+      session: {
+        id: path.split('/')[3],
+        status: 'ACTIVE',
+        triggeredAt: new Date().toISOString(),
+        cancelledAt: null,
+        resolvedAt: null,
+        expiresAt: null,
+        lat: body.lat ?? null,
+        lng: body.lng ?? null,
+        accuracy: body.accuracy ?? null,
+        battery: body.battery ?? null,
+        heading: body.heading ?? null,
+        speed: body.speed ?? null,
+        mapsUrl: null,
+        journeyId: null,
+        acknowledgements: [],
+      },
+    } as T;
+  }
+
+  if (path.startsWith('/api/emergency/') && path.endsWith('/acknowledge')) {
+    return { acknowledgement: { id: `ack_${Date.now()}`, acknowledgedAt: new Date().toISOString() } } as T;
+  }
+
+  if (path === '/api/caregiver/overview') {
+    const user = getCachedUser() || DEMO_ACCOUNTS['user@watchora.app'].user;
+    const contacts = JSON.parse(localStorage.getItem('watchora_demo_contacts') || '[]');
+    const places = JSON.parse(localStorage.getItem('watchora_demo_places') || '[]');
+    const assistance = JSON.parse(localStorage.getItem('watchora_demo_assistance') || '[]');
+    return {
+      caregiver: { id: 'usr_care', email: 'caregiver@watchora.app', fullName: 'Caregiver Support' },
+      contacts: contacts.map((c: any) => ({
+        userId: 'usr_normal',
+        name: c.name,
+        relationship: c.relationship,
+        canReceiveAlerts: c.canReceiveAlerts,
+        canSeeLocation: c.canSeeLocation,
+      })),
+      blindUsers: [
+        { id: 'usr_normal', email: 'user@watchora.app', fullName: user.fullName || 'Suhasita Rani', preferredLanguage: user.preferredLanguage || 'en' },
+      ],
+      openAssistance: assistance.map((a: any) => ({
+        ...a,
+        user: { fullName: user.fullName || 'Suhasita Rani', email: user.email || 'user@watchora.app' },
+      })),
+      recentJourneys: [
+        {
+          id: 'jrn_prev1',
+          destination: 'City Center Market',
+          mode: 'WALKING',
+          startedAt: new Date(Date.now() - 3600000).toISOString(),
+          user: { fullName: user.fullName || 'Suhasita Rani' },
+        },
+      ],
+      savedPlaces: places.map((p: any) => ({ ...p, user: { fullName: user.fullName || 'Suhasita Rani' } })),
+    } as T;
+  }
+
+  if (path.startsWith('/api/caregiver/location/')) {
+    const activeJ = localStorage.getItem('watchora_demo_active_journey');
+    const journey = activeJ
+      ? JSON.parse(activeJ)
+      : {
+          id: 'jrn_demo',
+          destination: 'Central Park',
+          status: 'ACTIVE',
+          startedAt: new Date().toISOString(),
+          eta: null,
+          lastLat: 28.6139,
+          lastLng: 77.209,
+          lastBearing: 45,
+          lastLocationAt: new Date().toISOString(),
+        };
+    return {
+      consent: true,
+      journey,
+      trail: [
+        { lat: 28.613, lng: 77.208, recordedAt: new Date(Date.now() - 120000).toISOString() },
+        { lat: 28.6135, lng: 77.2085, recordedAt: new Date(Date.now() - 60000).toISOString() },
+        { lat: 28.6139, lng: 77.209, recordedAt: new Date().toISOString() },
+      ],
+    } as T;
+  }
+
   if (path === '/api/admin/users') {
     return {
       users: [
@@ -532,6 +907,39 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
         { id: 'usr_care', email: 'caregiver@watchora.app', fullName: 'Caregiver User', role: 'CAREGIVER', isActive: true, createdAt: new Date().toISOString() },
       ],
     } as T;
+  }
+
+  if (path.startsWith('/api/admin/users/') && path.endsWith('/role')) {
+    const id = path.split('/')[3];
+    return { user: { id, email: 'user@watchora.app', fullName: 'User', role: body.role || 'BLIND_USER', isActive: true, createdAt: new Date().toISOString() } } as T;
+  }
+
+  if (path.startsWith('/api/admin/users/') && path.endsWith('/active')) {
+    const id = path.split('/')[3];
+    return { user: { id, email: 'user@watchora.app', fullName: 'User', role: 'BLIND_USER', isActive: Boolean(body.isActive), createdAt: new Date().toISOString() } } as T;
+  }
+
+  if (path === '/api/admin/incidents') {
+    const incidents = JSON.parse(localStorage.getItem('watchora_demo_incidents') || '[]');
+    return { incidents: incidents.map((i: any) => ({ ...i, reporter: { fullName: i.reporter?.fullName || 'User', email: 'user@watchora.app' } })) } as T;
+  }
+
+  if (path.startsWith('/api/admin/incidents/') && method === 'DELETE') {
+    const id = path.split('/')[3];
+    const incidents: IncidentReport[] = JSON.parse(localStorage.getItem('watchora_demo_incidents') || '[]');
+    const filtered = incidents.filter((i) => i.id !== id);
+    localStorage.setItem('watchora_demo_incidents', JSON.stringify(filtered));
+    return undefined as T;
+  }
+
+  if (path.startsWith('/api/admin/incidents/') && path.endsWith('/status')) {
+    const id = path.split('/')[3];
+    return { incident: { id, category: 'General', description: '', severity: 'MEDIUM', createdAt: new Date().toISOString(), reporter: { fullName: 'User' } } } as T;
+  }
+
+  if (path === '/api/admin/assistance') {
+    const assistance = JSON.parse(localStorage.getItem('watchora_demo_assistance') || '[]');
+    return { requests: assistance.map((a: any) => ({ ...a, user: { fullName: 'Suhasita Rani', email: 'user@watchora.app' } })) } as T;
   }
 
   if (path === '/api/admin/ai-stats') {
@@ -551,11 +959,57 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
     } as T;
   }
 
-  if (path === '/api/admin/prompts') return { prompts: [] } as T;
-  if (path === '/api/admin/incidents') return { incidents: [] } as T;
-  if (path === '/api/admin/assistance') return { requests: [] } as T;
-  if (path.startsWith('/api/audit-logs')) return { logs: [] } as T;
-  if (path === '/api/caregiver/overview') return { peopleCount: 1, openSosCount: 0, recentJourneys: [], contacts: [] } as T;
+  if (path === '/api/admin/prompts') {
+    if (method === 'GET') {
+      const stored = localStorage.getItem('watchora_demo_prompts');
+      const prompts: PromptVersion[] = stored
+        ? JSON.parse(stored)
+        : [
+            { id: 'prm_1', mode: 'NAVIGATION', version: 1, prompt: 'Describe pathway and immediate obstacles.', isActive: true, createdAt: new Date().toISOString() },
+            { id: 'prm_2', mode: 'ENVIRONMENT', version: 1, prompt: 'Describe 360 surroundings and room layout.', isActive: true, createdAt: new Date().toISOString() },
+            { id: 'prm_3', mode: 'READING', version: 1, prompt: 'Read text visible in image verbatim.', isActive: true, createdAt: new Date().toISOString() },
+          ];
+      return { prompts } as T;
+    }
+    const stored = localStorage.getItem('watchora_demo_prompts');
+    const prompts: PromptVersion[] = stored ? JSON.parse(stored) : [];
+    const newPrm: PromptVersion = {
+      id: `prm_${Date.now()}`,
+      mode: body.mode || 'NAVIGATION',
+      version: prompts.filter((p) => p.mode === body.mode).length + 1,
+      prompt: body.prompt || '',
+      isActive: false,
+      createdAt: new Date().toISOString(),
+    };
+    prompts.unshift(newPrm);
+    localStorage.setItem('watchora_demo_prompts', JSON.stringify(prompts));
+    return { prompt: newPrm } as T;
+  }
+
+  if (path.startsWith('/api/admin/prompts/') && path.endsWith('/activate')) {
+    const id = path.split('/')[3];
+    const stored = localStorage.getItem('watchora_demo_prompts');
+    const prompts: PromptVersion[] = stored ? JSON.parse(stored) : [];
+    const target = prompts.find((p) => p.id === id);
+    if (target) {
+      prompts.forEach((p) => {
+        if (p.mode === target.mode) p.isActive = false;
+      });
+      target.isActive = true;
+      localStorage.setItem('watchora_demo_prompts', JSON.stringify(prompts));
+    }
+    return { ok: true, prompt: target || { id, mode: 'NAVIGATION', version: 1, prompt: '', isActive: true, createdAt: new Date().toISOString() } } as T;
+  }
+
+  if (path.startsWith('/api/audit-logs')) {
+    return {
+      logs: [
+        { id: 'log_1', action: 'LOGIN', entityType: 'USER', entityId: 'usr_normal', createdAt: new Date().toISOString(), actor: { email: 'user@watchora.app', fullName: 'Suhasita Rani' } },
+        { id: 'log_2', action: 'START_JOURNEY', entityType: 'JOURNEY', entityId: 'jrn_1', createdAt: new Date(Date.now() - 1800000).toISOString(), actor: { email: 'user@watchora.app', fullName: 'Suhasita Rani' } },
+      ],
+    } as T;
+  }
+
   if (path === '/api/tts/voices') {
     const list: TtsVoice[] = [
       // Sarvam AI Indian Neural Voices (bulbul:v3)
@@ -599,10 +1053,25 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
     ];
     return { voices: list, count: list.length } as T;
   }
-  if (path === '/api/safe-journey/active') return { journey: null } as T;
-  if (path === '/api/emergency/active') return { session: null } as T;
+
   if (path === '/api/ai/intent') {
-    return { intent: 'navigate', parameters: {}, confidence: 0.95, requiresConfirmation: false } as T;
+    const transcript = (body.transcript || '').toLowerCase().trim();
+    if (transcript.includes('emergency') || transcript.includes('sos') || transcript.includes('मदद') || transcript.includes('help')) {
+      return { intent: 'emergency', parameters: {}, confidence: 1.0, requiresConfirmation: true } as T;
+    }
+    if (transcript.includes('priya') || transcript.includes('aditya') || transcript.includes('neha') || transcript.includes('kavya') || transcript.includes('rahul') || transcript.includes('sapna') || transcript.includes('sobhana') || transcript.includes('shreya') || transcript.includes('pooja') || transcript.includes('simran') || transcript.includes('gurpreet') || transcript.includes('soumya')) {
+      const match = ['priya', 'aditya', 'neha', 'ashutosh', 'kavya', 'rahul', 'sapna', 'sobhana', 'midhun', 'shreya', 'pooja', 'simran', 'gurpreet', 'soumya'].find((p) => transcript.includes(p));
+      return { intent: 'change_voice', parameters: { voice: `sarvam-${match}` }, confidence: 1.0, requiresConfirmation: false } as T;
+    }
+    return { intent: 'describe_scene', parameters: {}, confidence: 0.9, requiresConfirmation: false } as T;
+  }
+
+  if (path === '/api/translate') {
+    return { translated_text: body.input || '', source_language_code: body.source_language_code || 'en', target_language_code: body.target_language_code || 'hi' } as T;
+  }
+
+  if (path === '/api/stt/transcribe') {
+    return { transcript: 'Voice sample transcribed', language_code: 'hi-IN' } as T;
   }
 
   return {} as T;

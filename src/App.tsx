@@ -961,13 +961,12 @@ function MainApp({
     }
   }
 
-  // Register the bridge so the voice provider can reach this handler + speech.
+  // Register the bridge so the voice provider can reach the freshest handler + speech state.
   useEffect(() => {
     voiceBridge.current.speak = (text, priority = 5, dedupeKey) => speak(text, priority as SpeechPriority, dedupeKey);
     voiceBridge.current.handleCommand = (intent) => handleVoiceCommand(intent);
     voiceBridge.current.stopSpeaking = () => stopSpeaking();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceBridge]);
+  });
 
   // Global "any touch stops the talking" barge-in. While Watchora is speaking
   // the microphone is paused (so it cannot hear its own voice and loop), which
