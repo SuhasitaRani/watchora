@@ -54,6 +54,46 @@ export function getDefaultVoiceForLanguage(langCode: string): string {
   }
 }
 
+export function getSpeechRecognitionLocale(langCode: string): string {
+  const code = (langCode || 'en').slice(0, 2).toLowerCase();
+  switch (code) {
+    case 'hi':
+      return 'hi-IN';
+    case 'ta':
+      return 'ta-IN';
+    case 'te':
+      return 'te-IN';
+    case 'kn':
+      return 'kn-IN';
+    case 'ml':
+      return 'ml-IN';
+    case 'bn':
+      return 'bn-IN';
+    case 'mr':
+      return 'mr-IN';
+    case 'gu':
+      return 'gu-IN';
+    case 'pa':
+      return 'pa-IN';
+    case 'od':
+      return 'or-IN';
+    case 'ur':
+      return 'ur-IN';
+    case 'es':
+      return 'es-ES';
+    case 'fr':
+      return 'fr-FR';
+    case 'de':
+      return 'de-DE';
+    case 'it':
+      return 'it-IT';
+    case 'en':
+      return 'en-US';
+    default:
+      return langCode.includes('-') ? langCode : `${langCode}-IN`;
+  }
+}
+
 export function getVoiceChangeSpeech(voiceName: string): string {
   const lang = getLangFromVoice(voiceName);
   const cleanName = voiceName.replace(/^sarvam-/, '').replace(/-[A-Z]{2}.*$/, '');

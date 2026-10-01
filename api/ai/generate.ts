@@ -25,6 +25,7 @@ export default async function handler(req: any, res: any) {
   const mode = body.mode || 'navigation';
   const prompt = (body.prompt || '').trim() || 'Describe what is ahead.';
   const imageDataUrl = body.imageDataUrl || '';
+  const language = (body.language || 'en').trim();
   const detections: Array<{
     className: string;
     confidence: number;
@@ -40,6 +41,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const sarvamApiKey = process.env.SARVAM_API_KEY || process.env.VITE_SARVAM_API_KEY;
   const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
   let imageParts: any[] = [];
@@ -80,8 +82,14 @@ Structure the response with a concise, clear summary headline in "summary", and 
         )}`
       : '';
 
+  const languagePrompt =
+    language && language !== 'en' && language !== 'English'
+      ? `\nIMPORTANT: Respond in language '${language}' (e.g. Hindi, Tamil, Telugu, Kannada, Bengali, Marathi, Gujarati, etc.), using natural, fluent phrasing appropriate for spoken screen-reader audio.`
+      : '';
+
   const promptText = `${instruction}
 ${sensorContext}
+${languagePrompt}
 
 User request: "${prompt}"
 

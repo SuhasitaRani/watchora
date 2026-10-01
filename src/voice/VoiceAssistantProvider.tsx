@@ -15,6 +15,7 @@ import { ConfirmationManager } from './confirmationManager';
 import { DEFAULT_VOICE_SETTINGS, isHandsFree, HANDS_FREE_ONBOARDING, MIC_PERMISSION_REQUEST, type VoiceIntent, type VoiceSettings } from './voiceTypes';
 import { loadVoiceSettings, saveVoiceSettings } from './voiceSettingsStorage';
 import { decideHandsFreeAction } from './handsFreeSession';
+import { getSpeechRecognitionLocale } from './voicePhrases';
 
 export type VoiceState =
   | 'idle'
@@ -297,7 +298,7 @@ export function VoiceAssistantProvider({ children, onCommand, speak: speakProp, 
     stopIntentionalRef.current = false;
     const rec = new Ctor();
     recognitionRef.current = rec;
-    rec.lang = settings.language === 'en' ? 'en-US' : settings.language === 'it' ? 'it-IT' : settings.language;
+    rec.lang = getSpeechRecognitionLocale(settings.language);
     appliedLangRef.current = settings.language;
     appliedWakeRef.current = settings.wakePhraseEnabled;
     rec.continuous = true;
@@ -472,7 +473,7 @@ export function VoiceAssistantProvider({ children, onCommand, speak: speakProp, 
     stopIntentionalRef.current = false;
     const rec = new Ctor();
     recognitionRef.current = rec;
-    rec.lang = settings.language === 'en' ? 'en-US' : settings.language === 'it' ? 'it-IT' : settings.language;
+    rec.lang = getSpeechRecognitionLocale(settings.language);
     rec.continuous = false;
     rec.interimResults = true;
     rec.onstart = () => setState('listening');

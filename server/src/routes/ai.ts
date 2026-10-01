@@ -107,6 +107,7 @@ export const SAFE_AI_INTENTS = [
   'start_navigation',
   'start_safe_journey',
   'check_journey',
+  'change_voice',
   'change_setting',
   'open_tab',
   'report_hazard',

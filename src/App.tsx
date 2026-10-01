@@ -1166,6 +1166,7 @@ function MainApp({
             prompt: nextPrompt.trim() || 'Analyze the current frame.',
             imageDataUrl,
             detections: clientDetections,
+            language: language || getLangFromVoice(voice),
           }),
           signal: controller.signal,
         });
@@ -1180,6 +1181,7 @@ function MainApp({
                 prompt: nextPrompt.trim() || 'Analyze the current frame.',
                 imageDataUrl,
                 detections: clientDetections,
+                language: language || getLangFromVoice(voice),
               }),
               signal: controller.signal,
             });
