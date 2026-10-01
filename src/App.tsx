@@ -41,10 +41,17 @@ import { PermissionSettings } from './pages/PermissionSettings';
 
 import type { VoiceIntent } from './voice/voiceTypes';
 import { HELP_MESSAGE } from './voice/voiceTypes';
-import type { VoiceBridge } from './VoiceFirstShell';
 import { LandingPage } from './LandingPage';
-import { VoiceFirstShell, createVoiceBridge, usePermissionService } from './VoiceFirstShell';
-import { getVoiceTestPhrase, getStepSpeech, getPhoneticFallback } from './voice/voicePhrases';
+import { createVoiceBridge, VoiceFirstShell, usePermissionService, type VoiceBridge } from './VoiceFirstShell';
+import {
+  getVoiceTestPhrase,
+  getStepSpeech,
+  getPhoneticFallback,
+  getLangFromVoice,
+  getVoiceChangeSpeech,
+  getLanguageChangeSpeech,
+  getDefaultVoiceForLanguage,
+} from './voice/voicePhrases';
 
 import { MapView } from './MapView';
 type TabKey = 'home' | 'tracking' | 'routes' | 'journey' | 'sos' | 'community' | 'caregiver' | 'settings' | 'admin';
@@ -874,16 +881,36 @@ function MainApp({
       case 'shorter_answer':
         speak('Switching to short descriptions.', 5, 'voice-short');
         break;
+      case 'change_voice': {
+        const targetVoice = params.voice || 'sarvam-priya';
+        setVoice(targetVoice);
+        const langCode = getLangFromVoice(targetVoice);
+        if (voiceBridge.current.setVoiceSettings) {
+          voiceBridge.current.setVoiceSettings({ voice: targetVoice, language: langCode });
+        }
+        const confirmationSpeech = getVoiceChangeSpeech(targetVoice);
+        speak(confirmationSpeech, 4, 'voice-change-cmd');
+        announce(`Voice changed to ${targetVoice}.`, 'online');
+        break;
+      }
       case 'change_setting': {
         const setting = params.setting;
-        const value = params.value === 'true' || params.value === 'on';
         if (setting === 'hazardVibration') {
+          const value = params.value === 'true' || params.value === 'on';
           setHapticSettings((h) => ({ ...h, hapticsEnabled: value }));
           speak(`Hazard vibration ${value ? 'on' : 'off'}.`, 5, 'voice-hvib');
         } else if (setting === 'voiceGuidance') {
           speak('Voice guidance is always available for safety. You can reduce verbosity in settings.', 5, 'voice-vguid');
         } else if (setting === 'language') {
-          speak(`Language change to ${value} is available in Settings.`, 5, 'voice-lang');
+          const targetLang = String(params.value || 'en');
+          const defaultVoice = getDefaultVoiceForLanguage(targetLang);
+          setVoice(defaultVoice);
+          if (voiceBridge.current.setVoiceSettings) {
+            voiceBridge.current.setVoiceSettings({ language: targetLang, voice: defaultVoice });
+          }
+          const langSpeech = getLanguageChangeSpeech(targetLang);
+          speak(langSpeech, 4, 'voice-lang-cmd');
+          announce(`Language changed to ${targetLang}.`, 'online');
         }
         break;
       }
@@ -1838,6 +1865,14 @@ function MainApp({
                 <SettingsTab
                   user={user}
                   language={language}
+                  onLanguageChange={(targetLang) => {
+                    const defaultVoice = getDefaultVoiceForLanguage(targetLang);
+                    setVoice(defaultVoice);
+                    voiceAssistant.setSettings({ language: targetLang, voice: defaultVoice });
+                    const langSpeech = getLanguageChangeSpeech(targetLang);
+                    speak(langSpeech, 4, 'lang-change-settings');
+                    announce(`Language changed to ${targetLang}.`, 'online');
+                  }}
                   themeMode={themeMode}
                   onThemeChange={setThemeMode}
                   voiceRate={voiceRate}
@@ -1854,7 +1889,8 @@ function MainApp({
                     setVoice(v);
                     const newLocale = localeFromVoice(v);
                     voiceAssistant.setSettings({ voice: v, language: newLocale.split('-')[0] });
-                    speak(getVoiceTestPhrase(v), 4, 'voice-change-test', voiceRate);
+                    const voiceSpeech = getVoiceChangeSpeech(v);
+                    speak(voiceSpeech, 4, 'voice-change-test', voiceRate);
                   }}
                   onTestVoice={() => speak(getVoiceTestPhrase(voice), 4, 'test-voice-btn', voiceRate)}
                   hapticSettings={hapticSettings}
@@ -2835,6 +2871,7 @@ function SafeJourneyTab({
 function SettingsTab({
   user,
   language,
+  onLanguageChange,
   themeMode,
   onThemeChange,
   voiceRate,
@@ -2857,6 +2894,7 @@ function SettingsTab({
 }: {
   user: PublicUser;
   language: string;
+  onLanguageChange: (lang: string) => void;
   themeMode: 'Light' | 'Dark';
   onThemeChange: (mode: 'Light' | 'Dark') => void;
   voiceRate: number;
@@ -2877,19 +2915,8 @@ function SettingsTab({
   isInstalled?: boolean;
   onInstallApp?: () => void;
 }) {
-  // Group voices by language so the picker reads naturally (e.g. हिन्दी).
-  const voiceGroups: Array<[string, TtsVoice[]]> = [];
-  if (voices) {
-    const byLang = new Map<string, TtsVoice[]>();
-    for (const v of voices) {
-      const key = `${v.language} · ${v.native}`;
-      const arr = byLang.get(key) ?? [];
-      arr.push(v);
-      byLang.set(key, arr);
-    }
-    for (const [lang, list] of byLang) voiceGroups.push([lang, list]);
-    voiceGroups.sort((a, b) => a[0].localeCompare(b[0]));
-  }
+  const sarvamVoices = (voices || []).filter((v) => v.shortName.startsWith('sarvam-'));
+  const edgeVoices = (voices || []).filter((v) => !v.shortName.startsWith('sarvam-'));
 
   return (
     <div className="screen-grid settings-grid">
@@ -2902,32 +2929,60 @@ function SettingsTab({
           </div>
         </div>
         <div className="settings-section">
-          <h3>Voice & audio</h3>
+          <h3>🎙️ Sarvam AI Voice & Language</h3>
           <div className="settings-row">
-            <span>Language</span>
-            <strong>{language}</strong>
+            <span>Active language</span>
+            <select
+              value={voiceSettings.language || 'en'}
+              onChange={(e) => onLanguageChange(e.target.value)}
+              aria-label="App Language"
+              style={{ maxWidth: '65%', padding: '6px 10px', borderRadius: 8 }}
+            >
+              <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+              <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+              <option value="te">🇮🇳 తెలుగు (Telugu)</option>
+              <option value="kn">🇮🇳 ಕನ್ನಡ (Kannada)</option>
+              <option value="ml">🇮🇳 മലയാളം (Malayalam)</option>
+              <option value="bn">🇮🇳 বাংলা (Bengali)</option>
+              <option value="mr">🇮🇳 मराठी (Marathi)</option>
+              <option value="gu">🇮🇳 ગુજરાતી (Gujarati)</option>
+              <option value="pa">🇮🇳 ਪੰਜਾਬੀ (Punjabi)</option>
+              <option value="od">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
+              <option value="ur">🇮🇳 اردو (Urdu)</option>
+              <option value="en">🇺🇸 English (US / Global)</option>
+              <option value="en-IN">🇮🇳 English (India)</option>
+              <option value="es">🇪🇸 Español (Spanish)</option>
+              <option value="fr">🇫🇷 Français (French)</option>
+              <option value="de">🇩🇪 Deutsch (German)</option>
+            </select>
           </div>
           <div className="settings-row">
-            <span>Neural voice</span>
+            <span>Neural voice (Changer)</span>
             <select
               value={voice}
               onChange={(event) => onVoiceChange(event.target.value)}
               aria-label="Neural voice"
-              style={{ maxWidth: '100%' }}
+              style={{ maxWidth: '65%', padding: '6px 10px', borderRadius: 8 }}
             >
-              {voiceGroups.length === 0 ? (
-                <option value={voice}>{voice}</option>
-              ) : (
-                voiceGroups.map(([lang, list]) => (
-                  <optgroup key={lang} label={lang}>
-                    {list.map((v) => (
-                      <option key={v.shortName} value={v.shortName}>
-                        {v.gender === 'Female' ? '👩' : '👨'} {v.shortName.replace(/-Neural$/, '')}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))
+              {sarvamVoices.length > 0 && (
+                <optgroup label="✨ Sarvam AI Neural (Ultra-Realistic Indian Voices)">
+                  {sarvamVoices.map((v) => (
+                    <option key={v.shortName} value={v.shortName}>
+                      {v.gender === 'Female' ? '👩' : '👨'} {v.native} · {v.language.replace(' (Sarvam AI)', '')}
+                    </option>
+                  ))}
+                </optgroup>
               )}
+              {edgeVoices.length > 0 && (
+                <optgroup label="🌐 Microsoft Edge Neural Voices">
+                  {edgeVoices.map((v) => (
+                    <option key={v.shortName} value={v.shortName}>
+                      {v.gender === 'Female' ? '👩' : '👨'} {v.shortName.replace(/-Neural$/, '')} ({v.language})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {!voices?.length && <option value={voice}>{voice}</option>}
             </select>
           </div>
           <div className="settings-row">
@@ -2971,8 +3026,39 @@ function SettingsTab({
             </button>
           )}
           <button className="secondary-btn" onClick={onTestVoice}>
-            <span aria-hidden="true">🔊</span> Test voice
+            <span aria-hidden="true">🔊</span> Test voice ({voice.replace(/^sarvam-/, '').toUpperCase()})
           </button>
+        </div>
+
+        <div className="settings-section">
+          <h3>⚡ Voice Patterns & Shortcuts</h3>
+          <p className="settings-hint">You can speak these voice commands naturally in Hindi, Tamil, Telugu, English, or your chosen language:</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8, marginTop: 8 }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: 10, borderRadius: 8 }}>
+              <strong>🎙️ Voice & Languages</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', opacity: 0.85 }}>
+                "Change voice to Priya", "आवाज़ आदित्य करो", "Speak in Tamil", "हिंदी में बोलो"
+              </p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: 10, borderRadius: 8 }}>
+              <strong>🚨 Emergency / SOS</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', opacity: 0.85 }}>
+                "Emergency", "एसओएस भेजो", "அவசரம்", "Share my location", "Cancel SOS"
+              </p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: 10, borderRadius: 8 }}>
+              <strong>🛡️ Safe Journey</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', opacity: 0.85 }}>
+                "Start safe journey", "यात्रा शुरू करो", "I am safe", "I arrived", "I am lost"
+              </p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: 10, borderRadius: 8 }}>
+              <strong>👁️ Vision & Assist</strong>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', opacity: 0.85 }}>
+                "Describe what is ahead", "आगे क्या है", "Read this label", "यह पढ़ो", "Start camera"
+              </p>
+            </div>
+          </div>
         </div>
         <div className="settings-section">
           <h3>Hazard alerts</h3>

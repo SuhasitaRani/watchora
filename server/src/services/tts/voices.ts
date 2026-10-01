@@ -51,8 +51,25 @@ const CURATED: Array<[string, string, string, string, string]> = [
   ['sw-KE', 'Swahili', 'Kiswahili', 'sw-KE-ZuriNeural', 'sw-KE-RafikiNeural'],
 ];
 
+const SARVAM_VOICES: VoiceOption[] = [
+  { shortName: 'sarvam-priya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'प्रिया (हिन्दी)', gender: 'Female' },
+  { shortName: 'sarvam-aditya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आदित्य (हिन्दी)', gender: 'Male' },
+  { shortName: 'sarvam-neha', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'नेहा (हिन्दी)', gender: 'Female' },
+  { shortName: 'sarvam-ashutosh', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आशुतोष (हिन्दी)', gender: 'Male' },
+  { shortName: 'sarvam-kavya', locale: 'ta-IN', language: 'Tamil (Sarvam AI)', native: 'காவ்யா (தமிழ்)', gender: 'Female' },
+  { shortName: 'sarvam-rahul', locale: 'te-IN', language: 'Telugu (Sarvam AI)', native: 'రాహుల్ (తెలుగు)', gender: 'Male' },
+  { shortName: 'sarvam-sapna', locale: 'kn-IN', language: 'Kannada (Sarvam AI)', native: 'ಸಪ್ನಾ (ಕನ್ನಡ)', gender: 'Female' },
+  { shortName: 'sarvam-sobhana', locale: 'ml-IN', language: 'Malayalam (Sarvam AI)', native: 'ശോഭന (മലയാളം)', gender: 'Female' },
+  { shortName: 'sarvam-midhun', locale: 'ml-IN', language: 'Malayalam (Sarvam AI)', native: 'മിഥുൻ (മലയാളം)', gender: 'Male' },
+  { shortName: 'sarvam-shreya', locale: 'bn-IN', language: 'Bengali (Sarvam AI)', native: 'শ্রেয়া (বাংলা)', gender: 'Female' },
+  { shortName: 'sarvam-pooja', locale: 'mr-IN', language: 'Marathi (Sarvam AI)', native: 'पूजा (मराठी)', gender: 'Female' },
+  { shortName: 'sarvam-simran', locale: 'gu-IN', language: 'Gujarati (Sarvam AI)', native: 'સિમરન (ગુજરાતી)', gender: 'Female' },
+  { shortName: 'sarvam-gurpreet', locale: 'pa-IN', language: 'Punjabi (Sarvam AI)', native: 'ਗੁਰਪ੍ਰੀਤ (ਪੰਜਾਬੀ)', gender: 'Female' },
+  { shortName: 'sarvam-soumya', locale: 'od-IN', language: 'Odia (Sarvam AI)', native: 'ସୌମ୍ୟା (ଓଡ଼ିଆ)', gender: 'Female' },
+];
+
 export function curatedVoices(): VoiceOption[] {
-  const out: VoiceOption[] = [];
+  const out: VoiceOption[] = [...SARVAM_VOICES];
   for (const [locale, language, native, female, male] of CURATED) {
     out.push({ shortName: female, locale, language, native, gender: 'Female' });
     out.push({ shortName: male, locale, language, native, gender: 'Male' });
@@ -62,12 +79,34 @@ export function curatedVoices(): VoiceOption[] {
 
 /** Default voice per language (female unless unavailable). */
 export function defaultVoiceFor(locale: string): string {
+  if (locale.startsWith('hi')) return 'sarvam-priya';
+  if (locale.startsWith('ta')) return 'sarvam-kavya';
+  if (locale.startsWith('te')) return 'sarvam-rahul';
+  if (locale.startsWith('kn')) return 'sarvam-sapna';
+  if (locale.startsWith('ml')) return 'sarvam-sobhana';
+  if (locale.startsWith('bn')) return 'sarvam-shreya';
+  if (locale.startsWith('mr')) return 'sarvam-pooja';
+  if (locale.startsWith('gu')) return 'sarvam-simran';
+  if (locale.startsWith('pa')) return 'sarvam-gurpreet';
+  if (locale.startsWith('od')) return 'sarvam-soumya';
   const row = CURATED.find(([l]) => l === locale);
   return row?.[3] ?? 'en-US-JennyNeural';
 }
 
-/** Locale from a voice short name (e.g. hi-IN-SwaraNeural -> hi-IN). */
+/** Locale from a voice short name (e.g. hi-IN-SwaraNeural -> hi-IN, sarvam-priya -> hi-IN). */
 export function localeFromVoice(shortName: string): string {
+  if (shortName.startsWith('sarvam-')) {
+    if (shortName.includes('kavya')) return 'ta-IN';
+    if (shortName.includes('rahul')) return 'te-IN';
+    if (shortName.includes('sapna')) return 'kn-IN';
+    if (shortName.includes('sobhana') || shortName.includes('midhun')) return 'ml-IN';
+    if (shortName.includes('shreya')) return 'bn-IN';
+    if (shortName.includes('pooja')) return 'mr-IN';
+    if (shortName.includes('simran')) return 'gu-IN';
+    if (shortName.includes('gurpreet')) return 'pa-IN';
+    if (shortName.includes('soumya')) return 'od-IN';
+    return 'hi-IN';
+  }
   const m = /^([a-z]{2}-[A-Z]{2})/.exec(shortName);
   return m?.[1] ?? 'en-US';
 }

@@ -79,4 +79,31 @@ describe('wake phrase parsing', () => {
     const parsed = parseWakePhrase('hey watchora, watchora');
     expect(parsed.matched).toBe(true);
   });
+
+  it('matches Indic and global multilingual wake phrases', () => {
+    // Hindi
+    expect(parseWakePhrase('हे वॉचोरा आगे क्या है').matched).toBe(true);
+    expect(parseWakePhrase('हे वॉचोरा आगे क्या है').command).toBe('आगे क्या है');
+    expect(parseWakePhrase('सुनो वॉचोरा कैमरा चालू करो').matched).toBe(true);
+    expect(parseWakePhrase('वॉचोरा').matched).toBe(true);
+
+    // Tamil
+    expect(parseWakePhrase('ஹே வாச்சோரா காட்சியை விவரி').matched).toBe(true);
+    expect(parseWakePhrase('ஹே வாச்சோரா காட்சியை விவரி').command).toBe('காட்சியை விவரி');
+
+    // Telugu
+    expect(parseWakePhrase('హే వాచోరా ముందు ఏముంది').matched).toBe(true);
+    expect(parseWakePhrase('హే వాచోరా ముందు ఏముంది').command).toBe('ముందు ఏముంది');
+
+    // Kannada
+    expect(parseWakePhrase('ಹೇ ವಾಚೋರಾ').matched).toBe(true);
+
+    // Bengali
+    expect(parseWakePhrase('হে ওয়াচোরা এটি পড়ুন').matched).toBe(true);
+    expect(parseWakePhrase('হে ওয়াচোরা এটি পড়ুন').command).toBe('এটি পড়ুন');
+
+    // Spanish
+    expect(parseWakePhrase('oye watchora describe el entorno').matched).toBe(true);
+    expect(parseWakePhrase('oye watchora describe el entorno').command).toBe('describe el entorno');
+  });
 });

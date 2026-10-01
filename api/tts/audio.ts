@@ -261,18 +261,22 @@ async function synthesizeSarvam(text: string, voice: string, rate: number, apiKe
     let speaker = defaultSpeaker;
     if (v.includes('aditya') || v.includes('ashutosh') || v.includes('madhur') || v.includes('prabhat')) {
       speaker = 'aditya';
-    } else if (v.includes('priya') || v.includes('anushka') || v.includes('swara') || v.includes('manisha')) {
+    } else if (v.includes('priya') || v.includes('anushka') || v.includes('swara') || v.includes('manisha') || v.includes('neha')) {
       speaker = 'priya';
     } else if (v.includes('rahul') || v.includes('mohan') || v.includes('valluvar')) {
       speaker = 'rahul';
-    } else if (v.includes('kavya') || v.includes('vidya') || v.includes('pallavi') || v.includes('shruti') || v.includes('sapna') || v.includes('sobhana')) {
+    } else if (v.includes('kavya') || v.includes('vidya') || v.includes('pallavi') || v.includes('shruti') || v.includes('sapna')) {
       speaker = 'kavya';
-    } else if (v.includes('shreya') || v.includes('tanishaa')) {
+    } else if (v.includes('shreya') || v.includes('tanishaa') || v.includes('soumya')) {
       speaker = 'shreya';
     } else if (v.includes('pooja') || v.includes('aarohi')) {
       speaker = 'pooja';
-    } else if (v.includes('simran') || v.includes('dhwani')) {
+    } else if (v.includes('simran') || v.includes('dhwani') || v.includes('gurpreet')) {
       speaker = 'simran';
+    } else if (v.includes('midhun')) {
+      speaker = 'midhun';
+    } else if (v.includes('sobhana')) {
+      speaker = 'sobhana';
     }
 
     const sanitizedText = text.slice(0, 500);

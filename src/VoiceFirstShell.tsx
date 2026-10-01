@@ -21,6 +21,8 @@ export interface VoiceBridge {
    * is speaking (otherwise the mic hears its own voice and can loop).
    */
   onSpeechChange: ((speaking: boolean) => void) | null;
+  /** Dynamically updates voice assistant settings (language, voice, etc.). */
+  setVoiceSettings?: (patch: Partial<import('./voice/voiceTypes').VoiceSettings>) => void;
 }
 
 export function createVoiceBridge(): VoiceBridge {

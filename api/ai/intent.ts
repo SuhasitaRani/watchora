@@ -45,8 +45,40 @@ export default async function handler(req: any, res: any) {
     res.status(200).json({ intent: 'start_safe_journey', parameters: {}, confidence: 0.9, requiresConfirmation: false });
     return;
   }
-  if (transcript.includes('help') || transcript.includes('what can i say')) {
-    res.status(200).json({ intent: 'help', parameters: {}, confidence: 1.0, requiresConfirmation: false });
+  if (transcript.includes('priya')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-priya' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('aditya')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-aditya' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('neha')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-neha' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('kavya')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-kavya' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('rahul')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-rahul' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('voice') || transcript.includes('change voice') || transcript.includes('sarvam')) {
+    res.status(200).json({ intent: 'change_voice', parameters: { voice: 'sarvam-priya' }, confidence: 0.9, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('hindi')) {
+    res.status(200).json({ intent: 'change_setting', parameters: { setting: 'language', value: 'hi' }, confidence: 0.95, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('tamil')) {
+    res.status(200).json({ intent: 'change_setting', parameters: { setting: 'language', value: 'ta' }, confidence: 0.95, requiresConfirmation: false });
+    return;
+  }
+  if (transcript.includes('telugu')) {
+    res.status(200).json({ intent: 'change_setting', parameters: { setting: 'language', value: 'te' }, confidence: 0.95, requiresConfirmation: false });
     return;
   }
 

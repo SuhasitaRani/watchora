@@ -39,7 +39,7 @@ describe('voice catalog', () => {
     const voices = curatedVoices();
     for (const locale of ['hi-IN', 'ta-IN', 'te-IN', 'kn-IN', 'ml-IN', 'bn-IN', 'gu-IN', 'mr-IN', 'ur-IN']) {
       const list = voices.filter((v) => v.locale === locale);
-      expect(list.length).toBe(2);
+      expect(list.length).toBeGreaterThanOrEqual(2);
       expect(list.some((v) => v.gender === 'Female')).toBe(true);
       expect(list.some((v) => v.gender === 'Male')).toBe(true);
     }
@@ -48,11 +48,14 @@ describe('voice catalog', () => {
   it('localeFromVoice parses the locale prefix', () => {
     expect(localeFromVoice('hi-IN-SwaraNeural')).toBe('hi-IN');
     expect(localeFromVoice('en-US-JennyNeural')).toBe('en-US');
+    expect(localeFromVoice('sarvam-priya')).toBe('hi-IN');
+    expect(localeFromVoice('sarvam-kavya')).toBe('ta-IN');
     expect(localeFromVoice('garbage')).toBe('en-US');
   });
 
   it('defaultVoiceFor returns a voice per locale with an English fallback', () => {
-    expect(defaultVoiceFor('hi-IN')).toBe('hi-IN-SwaraNeural');
+    expect(defaultVoiceFor('hi-IN')).toBe('sarvam-priya');
+    expect(defaultVoiceFor('ta-IN')).toBe('sarvam-kavya');
     expect(defaultVoiceFor('xx-XX')).toBe('en-US-JennyNeural');
   });
 });

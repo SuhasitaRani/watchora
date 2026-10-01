@@ -69,7 +69,7 @@ export type VoiceAssistantProps = {
   /** Bridge whose onSpeechChange the provider subscribes to, so recognition
    * pauses while Watchora itself is speaking (the mic would otherwise hear
    * its own voice and could loop). Optional for tests. */
-  bridge?: { current: { onSpeechChange: ((speaking: boolean) => void) | null } };
+  bridge?: { current: { onSpeechChange: ((speaking: boolean) => void) | null; setVoiceSettings?: (patch: Partial<VoiceSettings>) => void } };
 };
 
 type RecognitionLike = {
@@ -176,6 +176,7 @@ export function VoiceAssistantProvider({ children, onCommand, speak: speakProp, 
   // Subscribe to speech lifecycle so recognition pauses while TTS plays.
   useEffect(() => {
     if (!bridge) return;
+    bridge.current.setVoiceSettings = setSettings;
     bridge.current.onSpeechChange = (speaking: boolean) => {
       speechActiveRef.current = speaking;
       if (speaking) {

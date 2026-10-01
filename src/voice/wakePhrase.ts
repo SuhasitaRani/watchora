@@ -6,7 +6,47 @@
 // "Watchora", "OK Watchora"). Everything said before/without the wake phrase
 // is ignored (never routed, never sent to the network).
 
-export const DEFAULT_WAKE_PHRASES = ['hey watchora', 'watchora', 'ok watchora', 'wake watchora'];
+export const DEFAULT_WAKE_PHRASES = [
+  'hey watchora',
+  'watchora',
+  'ok watchora',
+  'wake watchora',
+  'hello watchora',
+  'hi watchora',
+  // Hindi / Devanagari
+  'हे वॉचोरा',
+  'हे वाचोरा',
+  'सुनो वॉचोरा',
+  'नमस्ते वॉचोरा',
+  'वॉचोरा',
+  'वाचोरा',
+  // Tamil
+  'ஹே வாச்சோரா',
+  'வாச்சோரா',
+  'வணக்கம் வாச்சோரா',
+  // Telugu
+  'హే వాచోరా',
+  'వాచోరా',
+  'నమస్కారం వాచోరా',
+  // Kannada
+  'ಹೇ ವಾಚೋರಾ',
+  'ವಾಚೋರಾ',
+  // Malayalam
+  'ഹേ വാച്ചോറ',
+  'വാച്ചോറ',
+  // Bengali
+  'হে ওয়াচোরা',
+  'ওয়াচোরা',
+  // Marathi
+  'हे वॉचोरा',
+  'वॉचोरा',
+  // Gujarati
+  'હે વોચોરા',
+  'વોચોરા',
+  // Spanish
+  'oye watchora',
+  'hola watchora',
+];
 
 export interface WakePhraseHit {
   /** Index of the matched phrase in the normalized transcript, or -1. */
@@ -26,9 +66,8 @@ export interface WakeParse {
 export function normalizeTranscript(text: string): string {
   return text
     .toLowerCase()
-    // Keep letters, digits, apostrophes and hyphens; everything else becomes
-    // a single space so "Hey, Watchora!" and "hey  watchora" both normalize.
-    .replace(/[^\w'’-]+/g, ' ')
+    // Keep Unicode letters, combining marks (Indic matras), digits, apostrophes and hyphens across all languages
+    .replace(/[^\p{L}\p{M}\p{N}'’-]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -44,8 +83,11 @@ export function findWakePhrase(transcript: string, wakePhrases: string[] = DEFAU
     const index = normalized.indexOf(phrase);
     if (index < 0) continue;
     const before = index === 0 ? '' : normalized[index - 1];
-    // Word boundary: the character before must not be a letter or digit.
-    if (before && /[a-z0-9]/.test(before)) continue;
+    const afterIdx = index + phrase.length;
+    const after = afterIdx >= normalized.length ? '' : normalized[afterIdx];
+    // Word boundary: the character before and after must not be a letter, mark, or digit.
+    if (before && /[\p{L}\p{M}\p{N}]/u.test(before)) continue;
+    if (after && /[\p{L}\p{M}\p{N}]/u.test(after)) continue;
     return { index, phrase };
   }
   return null;

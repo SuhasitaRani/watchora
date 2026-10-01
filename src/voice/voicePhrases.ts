@@ -5,11 +5,122 @@ export function getLangFromVoice(voiceName: string): string {
     if (voiceName.includes('shreya') || voiceName.includes('amit')) return 'bn';
     if (voiceName.includes('pooja') || voiceName.includes('rohan')) return 'mr';
     if (voiceName.includes('simran')) return 'gu';
-    if (voiceName.includes('ashutosh')) return 'hi';
+    if (voiceName.includes('sapna')) return 'kn';
+    if (voiceName.includes('sobhana') || voiceName.includes('midhun')) return 'ml';
+    if (voiceName.includes('gurpreet')) return 'pa';
+    if (voiceName.includes('soumya')) return 'od';
+    if (voiceName.includes('ashutosh') || voiceName.includes('aditya') || voiceName.includes('priya') || voiceName.includes('neha')) return 'hi';
     return 'hi';
   }
   const m = /^([a-z]{2})-[A-Z]{2}/.exec(voiceName);
   return m ? m[1] : 'en';
+}
+
+export function getDefaultVoiceForLanguage(langCode: string): string {
+  const code = langCode.slice(0, 2).toLowerCase();
+  switch (code) {
+    case 'hi':
+      return 'sarvam-priya';
+    case 'ta':
+      return 'sarvam-kavya';
+    case 'te':
+      return 'sarvam-rahul';
+    case 'kn':
+      return 'sarvam-sapna';
+    case 'ml':
+      return 'sarvam-sobhana';
+    case 'bn':
+      return 'sarvam-shreya';
+    case 'mr':
+      return 'sarvam-pooja';
+    case 'gu':
+      return 'sarvam-simran';
+    case 'pa':
+      return 'sarvam-gurpreet';
+    case 'od':
+      return 'sarvam-soumya';
+    case 'ur':
+      return 'ur-IN-GulNeural';
+    case 'es':
+      return 'es-ES-ElviraNeural';
+    case 'fr':
+      return 'fr-FR-DeniseNeural';
+    case 'de':
+      return 'de-DE-KatjaNeural';
+    case 'it':
+      return 'it-IT-ElsaNeural';
+    default:
+      return 'en-US-JennyNeural';
+  }
+}
+
+export function getVoiceChangeSpeech(voiceName: string): string {
+  const lang = getLangFromVoice(voiceName);
+  const cleanName = voiceName.replace(/^sarvam-/, '').replace(/-[A-Z]{2}.*$/, '');
+  const capitalized = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+  switch (lang) {
+    case 'hi':
+      return `वॉचोरा की आवाज़ अब ${capitalized} (सर्वम एआई) पर सेट हो गई है।`;
+    case 'ta':
+      return `வாச்சோரா குரல் ${capitalized} (சர்வம ஏஐ) ஆக மாற்றப்பட்டது.`;
+    case 'te':
+      return `వాచోరా వాయిస్ ${capitalized} (సర్వమ్ AI) కు మార్చబడింది.`;
+    case 'kn':
+      return `ವಾಚೋರಾ ಧ್ವನಿಯನ್ನು ${capitalized} ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.`;
+    case 'ml':
+      return `വാച്ചോറ ശബ്ദം ${capitalized} ലേക്ക് മാറ്റി.`;
+    case 'bn':
+      return `ওয়াচোরা ভয়েস এখন ${capitalized} (সারভম এআই)-তে সেট করা হয়েছে।`;
+    case 'mr':
+      return `वॉचोराचा आवाज आता ${capitalized} वर सेट केला आहे.`;
+    case 'gu':
+      return `વોચોરાનો અવાજ હવે ${capitalized} પર સેટ થયો છે.`;
+    case 'es':
+      return `Voz cambiada a ${capitalized}.`;
+    case 'fr':
+      return `Voix modifiée pour ${capitalized}.`;
+    case 'de':
+      return `Stimme geändert zu ${capitalized}.`;
+    default:
+      return `Watchora voice changed to ${capitalized}.`;
+  }
+}
+
+export function getLanguageChangeSpeech(langCode: string): string {
+  const code = langCode.slice(0, 2).toLowerCase();
+  switch (code) {
+    case 'hi':
+      return 'भाषा बदलकर हिन्दी कर दी गई है। वॉचोरा तैयार है।';
+    case 'ta':
+      return 'மொழி தமிழுக்கு மாற்றப்பட்டது. வாச்சோரா தயாராக உள்ளது.';
+    case 'te':
+      return 'భాష తెలుగులోకి మార్చబడింది. వాచోరా సిద్ధంగా ఉంది.';
+    case 'kn':
+      return 'ಭಾಷೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. ವಾಚೋರಾ ಸಿದ್ಧವಾಗಿದೆ.';
+    case 'ml':
+      return 'ഭാഷ മലയാളത്തിലേക്ക് മാറ്റി. വാച്ചോറ തയ്യാറാണ്.';
+    case 'bn':
+      return 'ভাষা বাংলায় পরিবর্তন করা হয়েছে। ওয়াচোরা প্রস্তুত।';
+    case 'mr':
+      return 'भाषा मराठी केली आहे. वॉचोरा तयार आहे.';
+    case 'gu':
+      return 'ભાષા ગુજરાતીમાં બદલાઈ ગઈ છે. વોચોરા તૈયાર છે.';
+    case 'pa':
+      return 'ਭਾਸ਼ਾ ਪੰਜਾਬੀ ਵਿੱਚ ਬਦਲ ਦਿੱਤੀ ਗਈ ਹੈ।';
+    case 'od':
+      return 'ଭାଷା ଓଡ଼ିଆକୁ ପରିବର୍ତ୍ତନ କରାଯାଇଛି।';
+    case 'ur':
+      return 'زبان اردو میں تبدیل کر دی گئی ہے۔';
+    case 'es':
+      return 'Idioma cambiado a español. Watchora está listo.';
+    case 'fr':
+      return 'Langue changée en français. Watchora est prêt.';
+    case 'de':
+      return 'Sprache auf Deutsch umgestellt. Watchora ist bereit.';
+    default:
+      return 'Language switched to English. Watchora is ready.';
+  }
 }
 
 export function getVoiceTestPhrase(voiceName: string): string {

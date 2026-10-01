@@ -211,10 +211,14 @@ export function localeFromVoice(shortName: string): string {
   if (shortName.startsWith('sarvam-')) {
     if (shortName.includes('vidya') || shortName.includes('kavya')) return 'ta-IN';
     if (shortName.includes('rahul')) return 'te-IN';
+    if (shortName.includes('sapna')) return 'kn-IN';
+    if (shortName.includes('sobhana') || shortName.includes('midhun')) return 'ml-IN';
     if (shortName.includes('shreya') || shortName.includes('amit')) return 'bn-IN';
     if (shortName.includes('pooja') || shortName.includes('rohan')) return 'mr-IN';
     if (shortName.includes('simran')) return 'gu-IN';
-    if (shortName.includes('ashutosh')) return 'hi-IN';
+    if (shortName.includes('gurpreet')) return 'pa-IN';
+    if (shortName.includes('soumya')) return 'od-IN';
+    if (shortName.includes('ashutosh') || shortName.includes('aditya') || shortName.includes('priya') || shortName.includes('neha')) return 'hi-IN';
     return 'hi-IN';
   }
   const m = /^([a-z]{2}-[A-Z]{2})/.exec(shortName);
@@ -554,15 +558,21 @@ function handleOfflineFallback<T>(path: string, options: RequestInit = {}): T {
   if (path === '/api/caregiver/overview') return { peopleCount: 1, openSosCount: 0, recentJourneys: [], contacts: [] } as T;
   if (path === '/api/tts/voices') {
     const list: TtsVoice[] = [
-      // Sarvam AI Neural Voices
+      // Sarvam AI Indian Neural Voices (bulbul:v3)
       { shortName: 'sarvam-priya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'प्रिया (हिन्दी)', gender: 'Female' },
       { shortName: 'sarvam-aditya', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आदित्य (हिन्दी)', gender: 'Male' },
       { shortName: 'sarvam-neha', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'नेहा (हिन्दी)', gender: 'Female' },
+      { shortName: 'sarvam-ashutosh', locale: 'hi-IN', language: 'Hindi (Sarvam AI)', native: 'आशुतोष (हिन्दी)', gender: 'Male' },
       { shortName: 'sarvam-kavya', locale: 'ta-IN', language: 'Tamil (Sarvam AI)', native: 'காவ்யா (தமிழ்)', gender: 'Female' },
       { shortName: 'sarvam-rahul', locale: 'te-IN', language: 'Telugu (Sarvam AI)', native: 'రాహుల్ (తెలుగు)', gender: 'Male' },
+      { shortName: 'sarvam-sapna', locale: 'kn-IN', language: 'Kannada (Sarvam AI)', native: 'ಸಪ್ನಾ (ಕನ್ನಡ)', gender: 'Female' },
+      { shortName: 'sarvam-sobhana', locale: 'ml-IN', language: 'Malayalam (Sarvam AI)', native: 'ശോഭന (മലയാളം)', gender: 'Female' },
+      { shortName: 'sarvam-midhun', locale: 'ml-IN', language: 'Malayalam (Sarvam AI)', native: 'മിഥുൻ (മലയാളം)', gender: 'Male' },
       { shortName: 'sarvam-shreya', locale: 'bn-IN', language: 'Bengali (Sarvam AI)', native: 'শ্রেয়া (বাংলা)', gender: 'Female' },
       { shortName: 'sarvam-pooja', locale: 'mr-IN', language: 'Marathi (Sarvam AI)', native: 'पूजा (मराठी)', gender: 'Female' },
       { shortName: 'sarvam-simran', locale: 'gu-IN', language: 'Gujarati (Sarvam AI)', native: 'સિમરન (ગુજરાતી)', gender: 'Female' },
+      { shortName: 'sarvam-gurpreet', locale: 'pa-IN', language: 'Punjabi (Sarvam AI)', native: 'ਗੁਰਪ੍ਰੀਤ (ਪੰਜਾਬੀ)', gender: 'Female' },
+      { shortName: 'sarvam-soumya', locale: 'od-IN', language: 'Odia (Sarvam AI)', native: 'ସୌମ୍ୟା (ଓଡ଼ିଆ)', gender: 'Female' },
       // Edge Neural Voices
       { shortName: 'en-US-JennyNeural', locale: 'en-US', language: 'English (US)', native: 'English (US)', gender: 'Female' },
       { shortName: 'en-US-GuyNeural', locale: 'en-US', language: 'English (US)', native: 'English (US)', gender: 'Male' },

@@ -25,6 +25,7 @@ export type VoiceIntentName =
   | 'more_detail'
   | 'shorter_answer'
   | 'change_setting'
+  | 'change_voice'
   | 'toggle_theme'
   | 'permission_status'
   | 'open_tab'
