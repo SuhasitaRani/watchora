@@ -240,6 +240,36 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  // Open Tabs / Screens
+  if (hasMatch(transcript, ['open home', 'go home', 'show home', 'home screen', 'dashboard', 'home', 'होम'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'home' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open assist', 'go to assist', 'show assist', 'vision assist', 'assist', 'असिस्ट'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'tracking' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open places', 'go to places', 'show places', 'saved places', 'my places', 'places', 'स्थान'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'routes' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open safe journey', 'open journey', 'go to journey', 'show journey', 'safe journey', 'सुरक्षित यात्रा'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'journey' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open sos', 'go to sos', 'show sos', 'open emergency screen', 'safety hub'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'sos' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open community', 'go to community', 'show community', 'community reports', 'community', 'समुदाय'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'community' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+  if (hasMatch(transcript, ['open settings', 'go to settings', 'show settings', 'preferences', 'settings', 'सेटिंग्स'])) {
+    res.status(200).json({ intent: 'open_tab', parameters: { tab: 'settings' }, confidence: 1.0, requiresConfirmation: false });
+    return;
+  }
+
   // Help
   if (hasMatch(transcript, ['help', 'what can i do', 'commands', 'मदद', 'सहायता', 'உதவி', 'సహాయం', 'ayuda'])) {
     res.status(200).json({ intent: 'help', parameters: {}, confidence: 1.0, requiresConfirmation: false });

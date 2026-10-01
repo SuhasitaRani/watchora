@@ -705,37 +705,37 @@ export function matchDeterministicCommand(transcript: string): VoiceIntent | nul
   }
 
   // ── Open tabs / navigation between screens ──
-  if (has(t, 'go home', 'open home', 'open the home screen', 'open dashboard', 'home screen', 'go to home', 'होम स्क्रीन', 'होम खोलो', 'मुखपृष्ठ', 'முகப்பு', 'హోమ్')) {
+  if (has(t, 'go home', 'open home', 'show home', 'open the home screen', 'open dashboard', 'home screen', 'go to home', 'home', 'होम', 'होम स्क्रीन', 'होम खोलो', 'मुखपृष्ठ', 'முகப்பு', 'హోమ్')) {
     return intent('open_tab', { tab: 'home' }, false, 1);
   }
-  if (has(t, 'open assist', 'go to assist', 'vision assist', 'assist screen', 'open visual assist', 'असिस्ट', 'विजुअल असिस्ट', 'காட்சி உதவி', 'విజువల్ అసిస్ట్')) {
+  if (has(t, 'open assist', 'go to assist', 'show assist', 'vision assist', 'assist screen', 'open visual assist', 'camera assist', 'assist', 'असिस्ट', 'विजुअल असिस्ट', 'காட்சி உதவி', 'విజువల్ అసిస్ట్')) {
     return intent('open_tab', { tab: 'tracking' }, false, 1);
   }
-  if (has(t, 'open safe journey', 'open journey', 'go to journey', 'safe travel', 'travel mode', 'सुरक्षित यात्रा खोलो', 'பாதுகாப்பான பயணம்')) {
+  if (has(t, 'open safe journey', 'open journey', 'go to journey', 'show journey', 'safe journey', 'safe travel', 'travel mode', 'सुरक्षित यात्रा खोलो', 'பாதுகாப்பான பயணம்')) {
     return intent('open_tab', { tab: 'journey' }, false, 1);
   }
-  if (has(t, 'open emergency', 'open sos', 'open safety', 'go to emergency', 'go to sos', 'safety hub', 'आपातकालीन स्क्रीन', 'அவசர திரை')) {
+  if (has(t, 'open emergency', 'open sos', 'open safety', 'go to emergency', 'go to sos', 'show sos', 'safety hub', 'आपातकालीन स्क्रीन', 'அவசர திரை')) {
     return intent('open_tab', { tab: 'sos' }, false, 1);
   }
-  if (has(t, 'open reading', 'open read', 'go to reading', 'reading mode', 'रीडिंग स्क्रीन')) {
+  if (has(t, 'open reading', 'open read', 'go to reading', 'reading mode', 'reading screen', 'रीडिंग स्क्रीन')) {
     return intent('open_tab', { tab: 'tracking', mode: 'reading' }, false, 1);
   }
-  if (has(t, 'open saved places', 'open places', 'open my places', 'go to saved places', 'my places', 'सहेजे गए स्थान', 'स्थान सूची', 'இடங்கள்')) {
+  if (has(t, 'open saved places', 'open places', 'go to places', 'show places', 'places', 'open my places', 'go to saved places', 'saved places', 'my places', 'सहेजे गए स्थान', 'स्थान सूची', 'இடங்கள்')) {
     return intent('open_tab', { tab: 'routes' }, false, 1);
   }
-  if (has(t, 'open trusted contacts', 'open contacts', 'open my contacts', 'go to contacts', 'trusted contacts', 'विश्वसनीय संपर्क', 'தொடர்புகள்')) {
+  if (has(t, 'open trusted contacts', 'open contacts', 'go to contacts', 'show contacts', 'contacts', 'open my contacts', 'trusted contacts', 'विश्वसनीय संपर्क', 'தொடர்புகள்')) {
     return intent('open_tab', { tab: 'sos', section: 'contacts' }, false, 1);
   }
-  if (has(t, 'open settings', 'go to settings', 'app settings', 'preferences', 'सेटिंग्स', 'सेटिंग्स खोलो', 'அமைப்புகள்', 'సెట్టింగ్‌లు', 'ajustes')) {
+  if (has(t, 'open settings', 'go to settings', 'show settings', 'settings', 'app settings', 'preferences', 'voice settings', 'सेटिंग्स', 'सेटिंग्स खोलो', 'அமைப்புகள்', 'సెట్టింగ్‌లు', 'ajustes')) {
     return intent('open_tab', { tab: 'settings' }, false, 1);
   }
-  if (has(t, 'open community', 'open reports', 'go to community', 'community reports', 'hazard reports', 'कम्युनिटी', 'समुदाय', 'சமூகம்')) {
+  if (has(t, 'open community', 'go to community', 'show community', 'community', 'open reports', 'community reports', 'hazard reports', 'कम्युनिटी', 'समुदाय', 'சமூகம்')) {
     return intent('open_tab', { tab: 'community' }, false, 1);
   }
-  if (has(t, 'open caregiver', 'go to caregiver', 'caregiver portal', 'caregiver', 'केयरगिवर')) {
+  if (has(t, 'open caregiver', 'go to caregiver', 'show caregiver', 'caregiver', 'caregiver portal', 'केयरगिवर')) {
     return intent('open_tab', { tab: 'caregiver' }, false, 1);
   }
-  if (has(t, 'open admin', 'go to admin', 'admin panel', 'admin dashboard', 'एडमिन')) {
+  if (has(t, 'open admin', 'go to admin', 'show admin', 'admin', 'admin panel', 'admin dashboard', 'एडमिन')) {
     return intent('open_tab', { tab: 'admin' }, false, 1);
   }
   if (has(t, 'what can i do', 'what can you do', 'help', 'what commands', 'list commands', 'voice commands', 'मदद', 'सहायता', 'क्या कर सकते हो', 'உதவி', 'సహాయం', 'ayuda')) {
